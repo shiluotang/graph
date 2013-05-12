@@ -178,18 +178,21 @@ Graph.prototype.drawText = function(literal, position) {
 	this.ctx.fillText(literal, position.x, position.y);
 	this.ctx.closePath();
 }
-Graph.prototype.drawCurve = function(points, t) {
-	t = t || 0.5;
-
+Graph.prototype.drawCurve = function(points, startIndex, endIndex, t) {
 	var len = points.length;
-	var controlPoints = new Array(len);
+	startIndex = startIndex || 0;
+	endIndex = endIndex || len - 1;
+	t = t || 0.5;
+	if(endIndex - startIndex < 2)
+		return;
+	var controlPoints = new Array(endIndex - startIndex);
 
 	var p0 = null, p1 = null, p2 = null;
 	var d01 = 0.0, d12 = 0.0;
 	var u = 0.0;
 	var fa = 0.0, fb = 0.0;
 	var v02 = new Point2D();
-	for(var i = 1; i < len - 1; ++i) {
+	for(var i = startIndex + 1; i < endIndex; ++i) {
 		p0 = points[i - 1];
 		p1 = points[i];
 		p2 = points[i + 1];
@@ -212,18 +215,18 @@ Graph.prototype.drawCurve = function(points, t) {
 	var cp1 = null, cp2 = null;
 
 	this.ctx.beginPath();
-	for(var i = 1; i < len - 2; ++i) {
+	for(var i = startIndex + 1; i < endIndex - 1; ++i) {
 		cp1 = controlPoints[i][1];
 		cp2 = controlPoints[i + 1][0];
 		this.bezierCurveTo(points[i], cp1, cp2, points[i + 1]);
 	}
 	//the first part
-	this.quadraticCurveTo(points[0], controlPoints[1][0], points[1]);
+	this.quadraticCurveTo(points[startIndex], controlPoints[startIndex + 1][0], points[startIndex + 1]);
 	//the last part
-	this.quadraticCurveTo(points[len - 2], controlPoints[len - 2][1], points[len - 1]);
+	this.quadraticCurveTo(points[endIndex - 1], controlPoints[endIndex - 1][1], points[endIndex]);
 	this.ctx.stroke();
 	this.ctx.closePath();
-	for(var i = 1; i < len - 1; ++i)
+	for(var i = startIndex + 1; i < endIndex; ++i)
 		controlPoints[i].length = 0;
 	controlPoints.length = 0;
 }
