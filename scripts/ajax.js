@@ -53,7 +53,7 @@ var Ajax = Ajax || {
 
 		if(request.method === "POST") {
 			request.headers.push("Content-Type", "x/www-form-urlencoded");
-		} else {
+		} else if (request.method === "GET") {
 			var pos = request.url.indexOf('?');
 			if(pos === -1) {
 				pos = request.url.indexOf("://");
@@ -62,15 +62,13 @@ var Ajax = Ajax || {
 					request.url = request.url + '/?' + request.data;
 				else
 					request.url = request.url + "?" + request.data;
-			}
-			else if(pos < request.url.length() - 1)
-				request.url = request.url + request.data;
-			else
+			} else if(pos < request.url.length() - 1)
 				request.url = request.url + "&" + request.data;
+			else
+				request.url = request.url + request.data;
 			request.data = null;
-		}
-		console.log(request.url);
-		console.log(request.data);
+		} else
+			request.data = null;
 		return request;
 	},
 	doRequest : function(xhr, requestData) {
