@@ -52,72 +52,7 @@ function test1() {
 	}
 }
 
-function SimpleCatroon() {
-	this.points = new Array(10);
-	for(var i = 0; i < this.points.length; ++i)
-		this.points[i] = new Point2D(0, 0);
-	this.offset = 0;
-	this.CIRCLE_RADIAN = Math.PI * 2;
-}
-SimpleCatroon.prototype = new Painter();
-SimpleCatroon.prototype.paint = function(graph) {
-	var len = this.points.length;
-	var w = graph.getWidth();
-	var h = graph.getHeight();
-	h *= 0.5;
-	var coeff = 1 / (len - 1);
-	var ratio = 0.0;
-	for(var i = 0; i < len; ++i) {
-		ratio = i * coeff;
-		this.points[i].x = ratio * w;
-		//this.points[i].y = Math.random() * h;
-		this.points[i].y = (Math.sin(ratio * this.CIRCLE_RADIAN + this.offset) + 1) * h;
-	}
-	graph.clear();
-	graph.drawPoints(this.points);
-	this.offset += this.CIRCLE_RADIAN / 50;
-	return true;
-}
-
-function GravityCartoon(h, a, v) {
-	this.h0 = h;
-	this.h = h;
-	this.acceleration = a || 9.8 * 100;
-	this.velocity = v || 0.0;
-	this.point = new Point2D(0, 0);
-}
-GravityCartoon.prototype = new Painter();
-GravityCartoon.prototype.paint = function(graph) {
-	var t = 1 / 24;
-	var v = this.velocity;
-	var delta_v = this.acceleration * t;
-	var s = (v + 0.5 * delta_v) * t;
-	this.velocity = v + delta_v;
-	if(this.h < s) {
-		this.h = 0;
-		this.velocity *= -1;
-	} else
-		this.h -= s;
-	this.point.y = this.h0 - this.h;
-	graph.clear();
-	graph.drawPoint(this.point);
-	return true;
-}
-
 function test2() {
-	try {
-		var pen1 = new Pen(Color.RED, 1);
-		var pen2 = new Pen(Color.BLUE, 5);
-		var g = new Graph(get2DContext("canvas_node"), pen2);
-		var painter = new GravityCartoon(g.getHeight() / 2);
-		var movie = new FrameMovie(g, painter);
-		movie.start();
-	} catch(e) {
-		window.alert(e);
-	}
-}
-
-function test3() {
 	var requestData = {
 		url: "http://www.baidu.com",
 		data : { id : 3 },
@@ -127,5 +62,5 @@ function test3() {
 	Ajax.request(requestData);
 }
 
+HtmlDom.addEventListener(window, "onload", test1);
 HtmlDom.addEventListener(window, "onload", test2);
-HtmlDom.addEventListener(window, "onload", test3);
