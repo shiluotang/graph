@@ -227,11 +227,15 @@ Graph.prototype.drawCurve = function(points, t) {
 		controlPoints[i].length = 0;
 	controlPoints.length = 0;
 }
-Graph.prototype.drawPlotted = function(points) {
+Graph.prototype.drawLines = function(points, startIndex, endIndex) {
 	var len = points.length;
+	startIndex = startIndex || 0;
+	endIndex = endIndex || len - 1;
+	if(endIndex - startIndex < 1)
+		return;
 	this.ctx.beginPath();
-	this.ctx.moveTo(points[0].x, points[0].y);
-	for(var i = 1; i < len; ++i)
+	this.ctx.moveTo(points[startIndex].x, points[startIndex].y);
+	for(var i = startIndex + 1; i <= endIndex; ++i)
 		this.ctx.lineTo(points[i].x, points[i].y);
 	this.ctx.stroke();
 	this.ctx.closePath();
