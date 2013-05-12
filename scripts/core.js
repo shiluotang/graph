@@ -10,6 +10,14 @@ var Type = Type || {
 	isDate : function(o) { return typeof(o) === "date" || o instanceof Date; },
 	isRegExp : function(o) { return typeof(o) === "regexp" || o instanceof RegExp; },
 	isError : function(o) { return typeof(o) === "error" || o instanceof Error; },
+	isOfSimpleType : function(o) {
+		return Type.isString(o)
+			|| Type.isFunction(o)
+			|| Type.isNumber(o)
+			|| Type.isDate(o)
+			|| Type.isRegExp(o)
+			|| Type.isError(o);
+	},
 	toString : function(o, type) {
 		type = type || Object;
 		if(o.toString)
@@ -26,8 +34,7 @@ function enhance(proto, obj, override) {
 		} else
 			proto[prop] = obj[prop];
 }
-var ObjectEnhancement = {
-};
+var ObjectEnhancement = { };
 var ArrayEnhancement = {
 	indexOf : function(item) {
 		var len = this.length;
@@ -62,27 +69,34 @@ var JSONEnhancement = {
 	},
 	stringify : function(value, replacer, space) {
 		console.log("not the raw implemetation");
-		var stack = new Array();
-		var ident = "";
-		var PropList = undefined;
-		var ReplacerFunction = undefined;
-		if(Type.isFunction(replacer))
-			ReplacerFunction = replacer;
-		else if(Type.isArray(replacer)) {
-			PropList = new Array();
-			for(var i = 0; i < replacer.length; ++i) {
-				var item = undefined;
-				var v = replacer[i];
-				if(Type.isString(v))
-					item = v;
-				else
-					item = Type.toString(v);
-				if(item)
-					PropList.push(item);
-			}
+		function dumpArray(a) {
+			var len = a.length;
+			var elements = new Array(len);
+			for(var i = 0; i < len; ++i)
+				elements[i] = dump(a[i]);
+			return "[" + elements.join(",") + "]";
 		}
-		if(Type.isNumber(space) || Type.isString(space))
-			space = space.valueOf();
+		function dumpObj(obj) {
+			var props = new Array();
+			var item = "";
+			for(var propName in obj) {
+				item = "";
+				item.concat("\"", propName, "\" : ", dump(obj[propName]));
+				props.push(item);
+			}
+			return "{" + props.join(",") + "}";
+		}
+		function dump(x) {
+			var toJSON = x.toJSON || Object.prototype.toJSON;
+			if(toJSON)
+				return toJSON.call(x);
+			if(Type.isOfSimpleType(x))
+				return x.toString();
+			if(Type.isArray(x))
+				return dumpArray(x);
+			return dumpObj(x);
+		}
+		return dump(value);
 	}
 };
 enhance(Object.prototype, ObjectEnhancement, false);
@@ -90,22 +104,6 @@ enhance(Array.prototype, ArrayEnhancement, false);
 enhance(JSON || new Object(), JSONEnhancement, false);
 
 function RootObject() { }
-RootObject.prototype.toFieldsString = function() {
-	var props = new Array();
-	for(var propName in this) {
-		try{
-			var value = this[propName];
-			if(value instanceof Function)
-				continue;
-			if(value instanceof String || typeof(value) === "string")
-				props.push(propName + ":" + "\"" + value + "\"");
-			else
-				props.push(propName + ":" + value);
-		} catch(e) {
-		}
-	}
-	props.sort();
-	return props.join(", ");
-}
+RootObject.prototype.toFieldsString = function() { return JSON.stringify(this); }
 RootObject.prototype.toString = function() { return this.toFieldsString(); }
 RootObject.prototype.equals = function(other) { return this === other; }

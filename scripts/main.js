@@ -1,11 +1,5 @@
-function getDomNode(nodeOrId) {
-	if(nodeOrId instanceof String || typeof(nodeOrId) === "string")
-		return document.getElementById(nodeOrId);
-	return nodeOrId;
-}
-
 function get2DContext(nodeOrId) {
-	var node = getDomNode(nodeOrId);
+	var node = HtmlDom.$(nodeOrId);
 	var ctx = null;
 	if(node.getContext) try {
 		ctx = node.getContext("2d");
@@ -29,7 +23,8 @@ function test1() {
 		var ratio = 0.0;
 		for(var i = 0; i < N; ++i) {
 			ratio = i / (N -1);
-			points[i] = new Point2D(ratio * w , Math.random() * g.getHeight());
+			points[i] = new Point2D(ratio * w , 
+					Math.random() * g.getHeight());
 		}
 		g.clear();
 		g.setPen(pen2);
@@ -100,7 +95,7 @@ GravityCartoon.prototype.paint = function(graph) {
 	this.velocity = v + delta_v;
 	if(this.h < s) {
 		this.h = 0;
-		this.velocity *= -.7;
+		this.velocity *= -1;
 	} else
 		this.h -= s;
 	this.point.y = this.h0 - this.h;
@@ -111,15 +106,26 @@ GravityCartoon.prototype.paint = function(graph) {
 
 function test2() {
 	try {
-		//var pen1 = new Pen(Color.RED, 1);
-		//var pen2 = new Pen(Color.BLUE, 5);
-		//var g = new Graph(get2DContext("canvas_node"), pen2);
-		//var painter = new GravityCartoon(g.getHeight());
-		//var movie = new FrameMovie(g, painter);
-		//movie.start();
+		var pen1 = new Pen(Color.RED, 1);
+		var pen2 = new Pen(Color.BLUE, 5);
+		var g = new Graph(get2DContext("canvas_node"), pen2);
+		var painter = new GravityCartoon(g.getHeight() / 2);
+		var movie = new FrameMovie(g, painter);
+		movie.start();
 	} catch(e) {
 		window.alert(e);
 	}
 }
 
-window.addEventListener("load", test2, true);
+function test3() {
+	var requestData = {
+		url: "http://www.baidu.com",
+		data : { id : 3 },
+		onSuccess : function(xhr, data) { console.log("AJAX OK"); },
+		onFailure : function(xhr, data) { console.log("AJAX FAILED" + JSON.stringify(data)); }
+	};
+	Ajax.request(requestData);
+}
+
+HtmlDom.addEventListener(window, "onload", test2);
+HtmlDom.addEventListener(window, "onload", test3);
