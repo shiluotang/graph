@@ -62,5 +62,45 @@ function test2() {
 	Ajax.request(requestData);
 }
 
-HtmlDom.addEventListener(window, "onload", test1);
-HtmlDom.addEventListener(window, "onload", test2);
+function createPoints(graph) {
+	var N = 60;
+	var points = new Array(N);
+	var w = graph.getWidth();
+	var h = graph.getHeight();
+	var ratio = 0.0;
+	for(var i = 0; i < N; ++i) {
+		ratio = i / (N - 1);
+		points[i] = new Point2D(
+					ratio * w,
+					(Math.sin(ratio * Math.PI * 2) + 1) * 0.5 * h
+				);
+	}
+	return points;
+}
+
+function ScalingAnimation(points) {
+	this.yscaling = 1;
+	this.points = points;
+}
+ScalingAnimation.prototype = new Painter();
+ScalingAnimation.prototype.paint = function(graph) {
+	if(this.yscaling < 0.25)
+		return false;
+	this.yscaling *= 0.99;
+	graph.clear();
+	var coordsys = graph.getCoordSystem();
+	coordsys.scaleVector.y = this.yscaling;
+	graph.setCoordSystem(coordsys);
+	graph.drawPoints(this.points);
+	graph.drawCurve(this.points);
+	return true;
+}
+
+function test3() {
+	var g = new Graph(get2DContext("canvas_node"));
+	var animation = new ScalingAnimation(createPoints(g));
+	var player = new FrameMovie(g, animation, 1);
+	player.start();
+}
+
+HtmlDom.addEventListener(window, "onload", test3);
