@@ -105,10 +105,17 @@ function Rectangle(leftTop, width, height) {
 Rectangle.prototype = new RootObject();
 Rectangle.prototype.area = function() { return this.width * this.height;}
 
-function Graph(ctx, pen) {
+function CoordSystem(translateVector, rotateRadius, scaleVector) {
+	this.translateVector = translateVector || new Point2D(0, 0);
+	this.rotateRadius = rotateRadius || 0;
+	this.scaleVector = scaleVector || new Point2D(1, 1);
+}
+
+function Graph(ctx, pen, coordsys) {
 	this.ctx = ctx;
 	pen = pen || new Pen();
 	this.setPen(pen);
+	this.setCoordSystem(coordsys);
 }
 Graph.prototype = new RootObject();
 Graph.CIRCLE_RADIAN = Math.PI * 2;
@@ -127,6 +134,21 @@ Graph.prototype.setPen = function(pen) {
 	this.ctx.fillStyle = pen.color.toString();
 	this.ctx.strokeStyle = pen.color.toString();
 	this.ctx.lineWidth = pen.size;
+}
+Graph.prototype.getCoordSystem = function() { 
+	return this.coordsys = (this.coordsys || new CoordSystem());
+}
+Graph.prototype.setCoordSystem = function(coordsys) {
+	if(!coordsys)
+		return;
+	if(coordsys.translateVector.x !== 0 || coordsys.translateVector.y !== 0)
+		this.ctx.translate(coordsys.translateVector.x, coordsys.translateVector.y);
+	if(coordsys.rotateRadius !== 0)
+		this.ctx.rotate(coordsys.rotateRadius);
+	if(coordsys.scaleVector.x !== 1 || coordsys.scaleVector.y !== 1)
+		this.ctx.scale(coordsys.scaleVector.x, coordsys.scaleVector.y);
+	this.ctx.coordsys = coordsys;
+	return this;
 }
 Graph.prototype.clear = function() {
 	this.ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
