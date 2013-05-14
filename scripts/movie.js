@@ -5,34 +5,37 @@ Painter.prototype.paint = function(graph) {}
 function FrameMovie(graph, painter, fps) {
 	this.graph = graph;
 	this.painter = painter;
-	this.fps = fps || 24;
 	this.isPlaying = false;
 	this.handle = null;
+	this.setFps(fps);
+	var me = this;
+	this.worker = function() { me.run(); };
 }
 FrameMovie.prototype = new RootObject();
+FrameMovie.prototype.setFps = function(fps) {
+	fps = fps || 24;
+	this.interval = 1000 / fps;
+}
 FrameMovie.prototype.run = function() {
-	if(!this.isPlaying || this.handle === null)
+	if(!this.isPlaying)
 		return;
-	this.painter.paint(this.graph);
-	var me = this;
-	this.handle = window.setTimeout(function() { me.run(); }, 1000 / this.fps);
+	if(this.painter.paint(this.graph))
+		this.handle = setTimeout(this.worker, this.interval);
+	else
+		this.stop();
 }
 FrameMovie.prototype.start = function() {
 	if(this.isPlaying)
 		return;
 	this.isPlaying = true;
-	var me = this;
-	if(this.painter.paint(this.graph))
-		this.handle = window.setTimeout(function() { me.run(); }, 1000 / this.fps);
-	else
-		this.stop();
+	this.run();
 }
 FrameMovie.prototype.stop = function() {
 	if(this.handle === null)
 		return;
-	window.clearTimeout(this.handle);
+	this.isPlaying = false;
+	clearTimeout(this.handle);
 	this.handle = null;
-	this.isRunning = false;
 }
 
 
