@@ -1,6 +1,13 @@
 function Painter() {}
 Painter.prototype = new RootObject();
-Painter.prototype.paint = function(graph) {}
+Painter.prototype.shouldStop = function() { return false; }
+Painter.prototype.paint = function(graph) {
+	if(this.shouldStop())
+		return false;
+	this.doPaint(graph);
+	return !this.shouldStop();
+}
+Painter.prototype.doPaint = function() { }
 
 function FrameMovie(graph, painter, fps) {
 	this.graph = graph;

@@ -81,26 +81,56 @@ function createPoints(graph) {
 function ScalingAnimation(points) {
 	this.yscaling = 1;
 	this.points = points;
+	this.penPoints = new Pen(Color.BLUE, 5);
+	this.penDefault = new Pen(Color.BLACK, 1);
 }
 ScalingAnimation.prototype = new Painter();
-ScalingAnimation.prototype.paint = function(graph) {
-	if(this.yscaling < 0.25)
-		return false;
-	this.yscaling *= 0.99;
+ScalingAnimation.prototype.shouldStop = function() { return this.yscaling < 0.1; }
+ScalingAnimation.prototype.doPaint = function(graph) {
+	var a = new Point2D();
+	var b = new Point2D();
+	var ratio = 0;
+	var N = 10;
+	this.yscaling *= 0.999;
+	var w = graph.getWidth();
+	var h = graph.getHeight();
+
+	graph.ctx.restore();
+	graph.ctx.save();
 	graph.clear();
 	var coordsys = graph.getCoordSystem();
 	coordsys.scaleVector.y = this.yscaling;
 	graph.setCoordSystem(coordsys);
+	graph.setPen(this.penPoints);
 	graph.drawPoints(this.points);
+	graph.setPen(this.penDefault);
 	graph.drawCurve(this.points);
-	return true;
+	graph.drawText("What", new Point2D(0, 10));
+	for(var i = 0; i < N; ++i) {
+		ratio = i / (N - 1);
+		a.x = 0;
+		a.y = ratio * h;
+		b.x = w;
+		b.y = a.y;
+		graph.drawLine(a, b);
+	}
 }
 
 function test3() {
 	var g = new Graph(get2DContext("canvas_node"));
+	var cartesian = new CoordSystem(
+			new Point2D(0, g.getHeight()),
+			0,
+			new Point2D(1, -1));
+	g.setCoordSystem(cartesian);
+	g.drawText("I'm inversed!", new Point2D(0, 10));
+	g.setCoordSystem(new CoordSystem(null, null, new Point2D(1, -1)));
+	g.drawText("I'm origin!", new Point2D(0, -20));
+	/*
 	var animation = new ScalingAnimation(createPoints(g));
-	var player = new FrameMovie(g, animation, 1);
+	var player = new FrameMovie(g, animation);
 	player.start();
+	*/
 }
 
 HtmlDom.addEventListener(window, "onload", test3);

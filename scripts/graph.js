@@ -104,6 +104,17 @@ function Rectangle(leftTop, width, height) {
 }
 Rectangle.prototype = new RootObject();
 Rectangle.prototype.area = function() { return this.width * this.height;}
+function TransformMatrix(m00, m01, m11, m12, transformVector) {
+	this.m00 = m00 || 0;
+	this.m01 = m01 || 0;
+	this.m10 = m10 || 0;
+	this.m11 = m11 || 0;
+	this.transformVector = transformVector || new Point2D(0, 0);
+}
+TransformMatrix.prototype = new RootObject();
+TransformMatrix.prototype.rotate = function(radian) { return this; }
+TransformMatrix.prototype.transpose = function(dx, dy) { }
+TransformMatrix.prototype.scale = function() { }
 
 function CoordSystem(translateVector, rotateRadius, scaleVector) {
 	this.translateVector = translateVector || new Point2D(0, 0);
