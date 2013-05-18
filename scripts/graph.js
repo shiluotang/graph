@@ -161,6 +161,12 @@ Graph.prototype.setCoordSystem = function(coordsys) {
 	this.ctx.coordsys = coordsys;
 	return this;
 }
+Graph.prototype.setTransform = function(m00, m01, m10, m11, dx, dy) {
+	this.ctx.setTransform(m00, m01, m10, m11, dx, dy);
+}
+Graph.prototype.clearTransform = function() {
+	this.ctx.setTransform(1, 0, 0, 1, 1, 1);
+}
 Graph.prototype.clear = function() {
 	this.ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
 }
