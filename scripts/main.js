@@ -78,15 +78,19 @@ function createPoints(graph) {
 	return points;
 }
 
-function ScalingAnimation(points) {
+function ScalingAnimation(graph, points) {
 	this.yscaling = 1;
 	this.points = points;
 	this.penPoints = new Pen(Color.BLUE, 5);
 	this.penDefault = new Pen(Color.BLACK, 1);
+	this.graph = graph;
 }
-ScalingAnimation.prototype = new Painter();
-ScalingAnimation.prototype.shouldStop = function() { return this.yscaling < 0.1; }
-ScalingAnimation.prototype.doPaint = function(graph) {
+ScalingAnimation.prototype = new Runnable();
+ScalingAnimation.prototype.isFinished = function() {
+	return this.yscaling < 0.5; 
+}
+ScalingAnimation.prototype.doRun = function() {
+	var graph = this.graph;
 	var a = new Point2D();
 	var b = new Point2D();
 	var ratio = 0;
@@ -123,14 +127,14 @@ function test3() {
 			0,
 			new Point2D(1, -1));
 	g.setCoordSystem(cartesian);
+	/*
 	g.drawText("I'm inversed!", new Point2D(0, 10));
 	g.setCoordSystem(new CoordSystem(null, null, new Point2D(1, -1)));
 	g.drawText("I'm origin!", new Point2D(0, -20));
-	/*
-	var animation = new ScalingAnimation(createPoints(g));
-	var player = new FrameMovie(g, animation);
-	player.start();
 	*/
+	var animation = new ScalingAnimation(g, createPoints(g));
+	var player = new Timer(animation, 1000 / 24);
+	player.start();
 }
 
 HtmlDom.addEventListener(window, "onload", test3);
