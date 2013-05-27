@@ -122,34 +122,34 @@ function CoordSystem(translateVector, rotateRadius, scaleVector) {
 	this.scaleVector = scaleVector || new Point2D(1, 1);
 }
 
-function Graph(ctx, pen, coordsys) {
+function Graphics(ctx, pen, coordsys) {
 	this.ctx = ctx;
 	pen = pen || new Pen();
 	this.setPen(pen);
 	this.setCoordSystem(coordsys);
 }
-Graph.prototype = new RootObject();
-Graph.CIRCLE_RADIAN = Math.PI * 2;
+Graphics.prototype = new RootObject();
+Graphics.CIRCLE_RADIAN = Math.PI * 2;
 
-Graph.prototype.getWidth = function() { return this.ctx.canvas.width; }
-Graph.prototype.getHeight = function() { return this.ctx.canvas.height; }
-Graph.prototype.setWidth = function(width) {
+Graphics.prototype.getWidth = function() { return this.ctx.canvas.width; }
+Graphics.prototype.getHeight = function() { return this.ctx.canvas.height; }
+Graphics.prototype.setWidth = function(width) {
    	this.ctx.canvas.width = width; 
 }
-Graph.prototype.setHeight = function(height) {
+Graphics.prototype.setHeight = function(height) {
    	this.ctx.canvas.height = height; 
 }
-Graph.prototype.getPen = function() { return this.pen; }
-Graph.prototype.setPen = function(pen) {
+Graphics.prototype.getPen = function() { return this.pen; }
+Graphics.prototype.setPen = function(pen) {
 	this.pen = pen;
 	this.ctx.fillStyle = pen.color.toString();
 	this.ctx.strokeStyle = pen.color.toString();
 	this.ctx.lineWidth = pen.size;
 }
-Graph.prototype.getCoordSystem = function() { 
+Graphics.prototype.getCoordSystem = function() { 
 	return this.coordsys = (this.coordsys || new CoordSystem());
 }
-Graph.prototype.setCoordSystem = function(coordsys) {
+Graphics.prototype.setCoordSystem = function(coordsys) {
 	if(!coordsys)
 		return;
 	if(coordsys.translateVector.x !== 0 || coordsys.translateVector.y !== 0)
@@ -161,26 +161,26 @@ Graph.prototype.setCoordSystem = function(coordsys) {
 	this.ctx.coordsys = coordsys;
 	return this;
 }
-Graph.prototype.setTransform = function(m00, m01, m10, m11, dx, dy) {
+Graphics.prototype.setTransform = function(m00, m01, m10, m11, dx, dy) {
 	this.ctx.setTransform(m00, m01, m10, m11, dx, dy);
 }
-Graph.prototype.clearTransform = function() {
+Graphics.prototype.clearTransform = function() {
 	this.ctx.setTransform(1, 0, 0, 1, 1, 1);
 }
-Graph.prototype.clear = function() {
+Graphics.prototype.clear = function() {
 	this.ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
 }
-Graph.prototype.clearRect = function(rect) {
+Graphics.prototype.clearRect = function(rect) {
 	this.ctx.clearRect(rect.leftTop.x, rect.leftTop.y,
 			rect.width, rect.height);
 }
-Graph.prototype.begin = function() { this.ctx.beginPath(); }
-Graph.prototype.end = function() { this.ctx.closePath(); }
-Graph.prototype.lineTo = function(p1, p2) {
+Graphics.prototype.begin = function() { this.ctx.beginPath(); }
+Graphics.prototype.end = function() { this.ctx.closePath(); }
+Graphics.prototype.lineTo = function(p1, p2) {
 	this.ctx.moveTo(p1.x, p1.y);
 	this.ctx.lineTo(p2.x, p2.y);
 }
-Graph.prototype.bezierCurveTo = function(startPoint,
+Graphics.prototype.bezierCurveTo = function(startPoint,
 		controlPoint1,
 		controlPoint2,
 		endPoint) {
@@ -189,35 +189,35 @@ Graph.prototype.bezierCurveTo = function(startPoint,
 			controlPoint2.x, controlPoint2.y,
 			endPoint.x, endPoint.y);
 }
-Graph.prototype.quadraticCurveTo = function(startPoint, controlPoint, endPoint) {
+Graphics.prototype.quadraticCurveTo = function(startPoint, controlPoint, endPoint) {
 	this.ctx.moveTo(startPoint.x, startPoint.y);
 	this.ctx.quadraticCurveTo(controlPoint.x, controlPoint.y,
 			endPoint.x, endPoint.y);
 }
-Graph.prototype.drawLine = function(a, b) {
+Graphics.prototype.drawLine = function(a, b) {
 	this.ctx.beginPath();
 	this.ctx.moveTo(a.x, a.y);
 	this.ctx.lineTo(b.x, b.y);
 	this.ctx.stroke();
 	this.ctx.closePath();
 }
-Graph.prototype.drawPoint = function(p) {
+Graphics.prototype.drawPoint = function(p) {
 	this.ctx.beginPath();
 	this.ctx.moveTo(p.x, p.y);
 	this.ctx.arc(p.x, p.y, this.getPen().getSize(),
-			0, Graph.CIRCLE_RADIAN,
+			0, Graphics.CIRCLE_RADIAN,
 			true);
 	this.ctx.fill();
 	this.ctx.closePath();
 }
-Graph.prototype.drawText = function(literal, position) {
+Graphics.prototype.drawText = function(literal, position) {
 	position = position || Point2D.ORIGIN;
 	this.ctx.beginPath();
 	this.ctx.moveTo(position.x, position.y);
 	this.ctx.fillText(literal, position.x, position.y);
 	this.ctx.closePath();
 }
-Graph.prototype.drawCurve = function(points, startIndex, endIndex, t) {
+Graphics.prototype.drawCurve = function(points, startIndex, endIndex, t) {
 	var len = points.length;
 	startIndex = startIndex || 0;
 	endIndex = endIndex || len - 1;
@@ -269,7 +269,7 @@ Graph.prototype.drawCurve = function(points, startIndex, endIndex, t) {
 		controlPoints[i].length = 0;
 	controlPoints.length = 0;
 }
-Graph.prototype.drawLines = function(points, startIndex, endIndex) {
+Graphics.prototype.drawLines = function(points, startIndex, endIndex) {
 	var len = points.length;
 	startIndex = startIndex || 0;
 	endIndex = endIndex || len - 1;
@@ -282,23 +282,23 @@ Graph.prototype.drawLines = function(points, startIndex, endIndex) {
 	this.ctx.stroke();
 	this.ctx.closePath();
 }
-Graph.prototype.drawPoints = function(points, startIndex, endIndex) {
+Graphics.prototype.drawPoints = function(points, startIndex, endIndex) {
 	startIndex = startIndex || 0;
 	endIndex = endIndex || points.length - 1;
 	this.ctx.beginPath();
 	for(var i = startIndex; i <= endIndex; ++i) {
 		this.ctx.moveTo(points[i].x, points[i].y);
 		this.ctx.arc(points[i].x, points[i].y, this.pen.size,
-				0, Graph.CIRCLE_RADIAN,
+				0, Graphics.CIRCLE_RADIAN,
 				true);
 	}
 	this.ctx.fill();
 	this.ctx.closePath();
 }
-Graph.prototype.drawImage = function(img, position) {
+Graphics.prototype.drawImage = function(img, position) {
    	this.ctx.drawImage(img, position.x, position.y); 
 }
-Graph.prototype.drawSlicedImage = function(img, sourceRect, destRect) {
+Graphics.prototype.drawSlicedImage = function(img, sourceRect, destRect) {
 	this.ctx.drawImage(img,
 			sourceRect.leftTop.x, sourceRect.leftTop.y,
 			sourceRect.width, sourceRect.height,
