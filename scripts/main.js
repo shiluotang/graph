@@ -15,7 +15,7 @@ function test1() {
 		var pen1 = new Pen(Color.RED, 1);
 		var pen2 = new Pen(Color.BLUE, 3);
 
-		var g = new Graph(get2DContext("canvas_node"), pen2);
+		var g = new Graphics(get2DContext("canvas_node"), pen2);
 		var w = g.getWidth();
 		var h = g.getHeight();
 		var N = 12;
@@ -62,11 +62,11 @@ function test2() {
 	Ajax.request(requestData);
 }
 
-function createPoints(graph) {
+function createPoints(graphics) {
 	var N = 60;
 	var points = new Array(N);
-	var w = graph.getWidth();
-	var h = graph.getHeight();
+	var w = graphics.getWidth();
+	var h = graphics.getHeight();
 	var ratio = 0.0;
 	for(var i = 0; i < N; ++i) {
 		ratio = i / (N - 1);
@@ -78,50 +78,50 @@ function createPoints(graph) {
 	return points;
 }
 
-function ScalingAnimation(graph, points) {
+function ScalingAnimation(graphics, points) {
 	this.yscaling = 1;
 	this.points = points;
 	this.penPoints = new Pen(Color.BLUE, 5);
 	this.penDefault = new Pen(Color.BLACK, 1);
-	this.graph = graph;
+	this.graphics = graphics;
 }
 ScalingAnimation.prototype = new Runnable();
 ScalingAnimation.prototype.isFinished = function() {
 	return this.yscaling < 0.5; 
 }
 ScalingAnimation.prototype.doRun = function() {
-	var graph = this.graph;
+	var graphics = this.graphics;
 	var a = new Point2D();
 	var b = new Point2D();
 	var ratio = 0;
 	var N = 10;
 	this.yscaling *= 0.999;
-	var w = graph.getWidth();
-	var h = graph.getHeight();
+	var w = graphics.getWidth();
+	var h = graphics.getHeight();
 
-	graph.ctx.restore();
-	graph.ctx.save();
-	graph.clear();
-	var coordsys = graph.getCoordSystem();
+	graphics.ctx.restore();
+	graphics.ctx.save();
+	graphics.clear();
+	var coordsys = graphics.getCoordSystem();
 	coordsys.scaleVector.y = this.yscaling;
-	graph.setCoordSystem(coordsys);
-	graph.setPen(this.penPoints);
-	graph.drawPoints(this.points);
-	graph.setPen(this.penDefault);
-	graph.drawCurve(this.points);
-	graph.drawText("What", new Point2D(0, 10));
+	graphics.setCoordSystem(coordsys);
+	graphics.setPen(this.penPoints);
+	graphics.drawPoints(this.points);
+	graphics.setPen(this.penDefault);
+	graphics.drawCurve(this.points);
+	graphics.drawText("What", new Point2D(0, 10));
 	for(var i = 0; i < N; ++i) {
 		ratio = i / (N - 1);
 		a.x = 0;
 		a.y = ratio * h;
 		b.x = w;
 		b.y = a.y;
-		graph.drawLine(a, b);
+		graphics.drawLine(a, b);
 	}
 }
 
 function test3() {
-	var g = new Graph(get2DContext("canvas_node"));
+	var g = new Graphics(get2DContext("canvas_node"));
 	var cartesian = new CoordSystem(
 			new Point2D(0, g.getHeight()),
 			0,
