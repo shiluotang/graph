@@ -158,7 +158,7 @@ Graphics.prototype.setCoordSystem = function(coordsys) {
 		this.ctx.rotate(coordsys.rotateRadius);
 	if(coordsys.scaleVector.x !== 1 || coordsys.scaleVector.y !== 1)
 		this.ctx.scale(coordsys.scaleVector.x, coordsys.scaleVector.y);
-	this.ctx.coordsys = coordsys;
+	this.coordsys = coordsys;
 	return this;
 }
 Graphics.prototype.setTransform = function(m00, m01, m10, m11, dx, dy) {
