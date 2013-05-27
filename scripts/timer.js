@@ -44,7 +44,6 @@ Timer.prototype.start = function() {
 	this.isRunning = true;
 	this.worker();
 }
-
 Timer.prototype.stop = function() {
 	this.isRunning = false;
 	this.isInteruppted = true;
