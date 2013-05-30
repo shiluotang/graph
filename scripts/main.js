@@ -102,7 +102,7 @@ ScalingAnimation.prototype.doRun = function() {
 	graphics.ctx.restore();
 	graphics.ctx.save();
 	graphics.clear();
-	var coordsys = graphics.getCoordSystem();
+	var coordsys = new CoordSystem();
 	coordsys.scaleVector.y = this.yscaling;
 	graphics.setCoordSystem(coordsys);
 	graphics.setPen(this.penPoints);
