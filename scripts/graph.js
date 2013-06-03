@@ -14,6 +14,11 @@ function Color(red, green, blue, alpha) {
 		this.blue = this.blue * 255;
 }
 Color.prototype = new RootObject();
+Color.prototype.red = undefined;
+Color.prototype.green = undefined;
+Color.prototype.blue = undefined;
+Color.prototype.alpha = undefined;
+
 Color.prototype.getRed = function() { return this.red; }
 Color.prototype.getGreen = function() { return this.green; }
 Color.prototype.getBlue = function() { return this.blue; }
@@ -37,6 +42,9 @@ function Pen(color, size) {
 	this.size = size || 1;
 }
 Pen.prototype = new RootObject();
+Pen.prototype.color = undefined;
+Pen.prototype.size = undefined;
+
 Pen.prototype.getColor = function() { return this.color; }
 Pen.prototype.getSize = function() { return this.size; }
 
@@ -45,6 +53,9 @@ function Point2D(x, y) {
 	this.y = y || 0;
 }
 Point2D.prototype = new RootObject();
+Point2D.prototype.x = undefined;
+Point2D.prototype.y = undefined;
+
 Point2D.prototype.assign = function(other) {
 	this.x = other.x;
 	this.y = other.y;
@@ -71,7 +82,7 @@ Point2D.prototype.addSelf = function(other) {
 Point2D.prototype.substract = function(other) {
 	return new Point2D(this.x - other.x, this.y - other.y);
 }
-Point2D.prototype.substraceSelf = function(other) {
+Point2D.prototype.substractSelf = function(other) {
    	this.x -= other.x;
 	this.y -= other.y;
 	return this;
@@ -131,14 +142,17 @@ function Graphics(ctx, pen, coordsys) {
 Graphics.prototype = new RootObject();
 Graphics.CIRCLE_RADIAN = Math.PI * 2;
 
+//fields
+Graphics.prototype.ctx = undefined;
+Graphics.prototype.pen = undefined;
+Graphics.prototype.coordsys = undefined;
+
+//methods
 Graphics.prototype.getWidth = function() { return this.ctx.canvas.width; }
 Graphics.prototype.getHeight = function() { return this.ctx.canvas.height; }
-Graphics.prototype.setWidth = function(width) {
-   	this.ctx.canvas.width = width; 
-}
-Graphics.prototype.setHeight = function(height) {
-   	this.ctx.canvas.height = height; 
-}
+Graphics.prototype.setWidth = function(width) { this.ctx.canvas.width = width; }
+Graphics.prototype.setHeight = function(height) { this.ctx.canvas.height = height; }
+
 Graphics.prototype.getPen = function() { return this.pen; }
 Graphics.prototype.setPen = function(pen) {
 	this.pen = pen;
@@ -244,7 +258,7 @@ Graphics.prototype.drawCurve = function(points, startIndex, endIndex, t) {
 		fb = u * d12;
 
 		v02.assign(p2);
-		v02.substraceSelf(p0);
+		v02.substractSelf(p0);
 		controlPoints[i] = [
 				p1.substract(v02.scale(fa)),
 				p1.add(v02.scale(fb))

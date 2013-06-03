@@ -137,4 +137,39 @@ function test3() {
 	player.start();
 }
 
-HtmlDom.addEventListener(window, "onload", test3);
+function test4() {
+	var g = new Graphics(get2DContext("canvas_node"));
+	var cartesian = new CoordSystem(
+			new Point2D(0, g.getHeight()),
+			0,
+			new Point2D(1, -1));
+	g.setCoordSystem(cartesian);
+
+	var v = new Vector(3);
+	v.data[0] = 3;
+	v.data[1] = 4;
+	v.data[2] = 1;
+	var p = v.toMatrix();
+	var scaleMatrix = new Matrix(3, 3);
+	scaleMatrix.setIdentity();
+	scaleMatrix.set(0, 0, 10);
+	scaleMatrix.set(1, 1, 20);
+
+	var translateMatrix = new Matrix(3, 3);
+	translateMatrix.setIdentity();
+	translateMatrix.set(0, 2, 50);
+	translateMatrix.set(1, 2, 100);
+
+	var rotateMatrix = new Matrix(3, 3);
+	var theta = Math.PI / 6;
+	rotateMatrix.setIdentity();
+	rotateMatrix.set(0, 0, Math.cos(theta));
+	rotateMatrix.set(0, 1, -Math.sin(theta));
+	rotateMatrix.set(1, 0, Math.sin(theta));
+	rotateMatrix.set(1, 1, Math.cos(theta));
+
+	console.log(scaleMatrix.multiply(rotateMatrix.multiply(translateMatrix.multiply(p))).toString());
+	console.log(scaleMatrix.multiply(rotateMatrix).multiply(translateMatrix).multiply(p).toString());
+}
+
+HtmlDom.addEventListener(window, "onload", test4);
