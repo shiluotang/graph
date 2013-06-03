@@ -137,39 +137,119 @@ function test3() {
 	player.start();
 }
 
-function test4() {
-	var g = new Graphics(get2DContext("canvas_node"));
-	var cartesian = new CoordSystem(
-			new Point2D(0, g.getHeight()),
-			0,
-			new Point2D(1, -1));
-	g.setCoordSystem(cartesian);
+function Rotating(graphics) {
+	this.graphics = graphics;
+	this.theta = 0;
+	this.delta = Math.PI / 2 / 300;
+}
+Rotating.prototype = new Runnable();
+Rotating.prototype.isFinished = function() { return this.theta >= Math.PI / 2; }
+Rotating.prototype.doRun = function() {
+	this.theta += this.delta;
+	var g = this.graphics;
+	var w = g.getWidth();
+	var h = g.getHeight();
+	var observer = new Observer();
+	observer.moveTo(new Vector3(200, 60, 200));
+	observer.rotateY(this.theta);
+	//observer.rotateZ(Math.PI / 7);
+	//observer.rotateX(Math.PI / 8);
+	var origin = observer.get2DPosition(new Vector3(0, 0, 0));
+	var xAxis = observer.get2DPosition(new Vector3(100, 0, 0));
+	var yAxis = observer.get2DPosition(new Vector3(0, 100, 0));
+	var zAxis = observer.get2DPosition(new Vector3(0, 0, 100));
 
-	var v = new Vector(3);
-	v.data[0] = 3;
-	v.data[1] = 4;
-	v.data[2] = 1;
-	var p = v.toMatrix();
-	var scaleMatrix = new Matrix(3, 3);
-	scaleMatrix.setIdentity();
-	scaleMatrix.set(0, 0, 10);
-	scaleMatrix.set(1, 1, 20);
+	var p1 = observer.get2DPosition(new Vector3(0, 50, 50));
+	var p2 = observer.get2DPosition(new Vector3(50, 50, 50));
+	var p3 = observer.get2DPosition(new Vector3(50, 50, 0));
+	var p4 = observer.get2DPosition(new Vector3(0, 50, 0));
 
-	var translateMatrix = new Matrix(3, 3);
-	translateMatrix.setIdentity();
-	translateMatrix.set(0, 2, 50);
-	translateMatrix.set(1, 2, 100);
+	var p5 = observer.get2DPosition(new Vector3(0, 0, 50));
+	var p6 = observer.get2DPosition(new Vector3(50, 0, 50));
+	var p7 = observer.get2DPosition(new Vector3(50, 0, 0));
+	var p8 = observer.get2DPosition(new Vector3(0, 0, 0));
 
-	var rotateMatrix = new Matrix(3, 3);
-	var theta = Math.PI / 6;
-	rotateMatrix.setIdentity();
-	rotateMatrix.set(0, 0, Math.cos(theta));
-	rotateMatrix.set(0, 1, -Math.sin(theta));
-	rotateMatrix.set(1, 0, Math.sin(theta));
-	rotateMatrix.set(1, 1, Math.cos(theta));
+	g.clear();
+	g.setPen(new Pen(Color.RED));
+	g.drawLine(origin, xAxis);
+	g.drawLine(origin, yAxis);
+	g.drawLine(origin, zAxis);
+	g.drawText("X", xAxis);
+	g.drawText("Y", yAxis);
+	g.drawText("Z", zAxis);
+	g.setPen(new Pen(Color.BLACK));
 
-	console.log(scaleMatrix.multiply(rotateMatrix.multiply(translateMatrix.multiply(p))).toString());
-	console.log(scaleMatrix.multiply(rotateMatrix).multiply(translateMatrix).multiply(p).toString());
+	g.drawLine(p1, p2);
+	g.drawLine(p2, p3);
+	g.drawLine(p3, p4);
+	g.drawLine(p4, p1);
+	g.drawLine(p5, p6);
+	g.drawLine(p6, p7);
+	//g.drawLine(p7, p8);
+	//g.drawLine(p8, p5);
+
+	g.drawLine(p1, p5);
+	g.drawLine(p2, p6);
+	g.drawLine(p3, p7);
+	//g.drawLine(p4, p8);
+
 }
 
-HtmlDom.addEventListener(window, "onload", test4);
+function test4() {
+	var g = new Graphics(get2DContext("canvas_node"));
+	g.scale(1, -1);
+	g.translate(g.getWidth() / 2, g.getHeight() / 2);
+	var observer = new Observer();
+	observer.moveTo(new Vector3(100, 100, 100));
+	observer.rotateY(Math.PI * 2 / 100);
+	//observer.rotateZ(Math.PI / 7);
+	//observer.rotateX(Math.PI / 8);
+	var origin = observer.get2DPosition(new Vector3(0, 0, 0));
+	var xAxis = observer.get2DPosition(new Vector3(100, 0, 0));
+	var yAxis = observer.get2DPosition(new Vector3(0, 100, 0));
+	var zAxis = observer.get2DPosition(new Vector3(0, 0, 100));
+	g.setPen(new Pen(Color.RED));
+	g.drawLine(origin, xAxis);
+	g.drawLine(origin, yAxis);
+	g.drawLine(origin, zAxis);
+	g.drawText("X", xAxis);
+	g.drawText("Y", yAxis);
+	g.drawText("Z", zAxis);
+	g.setPen(new Pen(Color.BLACK));
+
+	var p1 = observer.get2DPosition(new Vector3(0, 50, 50));
+	var p2 = observer.get2DPosition(new Vector3(50, 50, 50));
+	var p3 = observer.get2DPosition(new Vector3(50, 50, 0));
+	var p4 = observer.get2DPosition(new Vector3(0, 50, 0));
+
+	var p5 = observer.get2DPosition(new Vector3(0, 0, 50));
+	var p6 = observer.get2DPosition(new Vector3(50, 0, 50));
+	var p7 = observer.get2DPosition(new Vector3(50, 0, 0));
+	var p8 = observer.get2DPosition(new Vector3(0, 0, 0));
+	g.drawLine(p1, p2);
+	g.drawLine(p2, p3);
+	g.drawLine(p3, p4);
+	g.drawLine(p4, p1);
+	g.drawLine(p5, p6);
+	g.drawLine(p6, p7);
+	//g.drawLine(p7, p8);
+	//g.drawLine(p8, p5);
+
+	g.drawLine(p1, p5);
+	g.drawLine(p2, p6);
+	g.drawLine(p3, p7);
+	//g.drawLine(p4, p8);
+
+	g.drawText("Hello world");
+}
+
+function test5() {
+	var g = new Graphics(get2DContext("canvas_node"));
+	g.scale(1, -1);
+	g.translate(g.getWidth() / 2, g.getHeight() / 2);
+	var rotating = new Rotating(g);
+	var timer = new Timer(rotating, 1000 / 24);
+	timer.start();
+}
+
+HtmlDom.addEventListener(window, "onload", test5);

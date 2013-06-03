@@ -477,8 +477,10 @@ Vector.prototype.normalizeSelf = function() {
 	return Vector.normalize(this.data, this.data, this.size);
 }
 
-function Vector3() {
-	this.x = this.y = this.z = 0;
+function Vector3(x, y, z) {
+	this.x = x || 0;
+	this.y = y || 0;
+	this.z = z || 0;
 }
 
 Vector3.prototype = new RootObject();
@@ -556,7 +558,8 @@ Vector3.prototype.normalizeSelf = function() {
 	return this;
 }
 
-function Vector4() {
+function Vector4(x, y, z, w) {
+	Vector3.call(this, x, y, z);
 	this.w = 0;
 }
 
