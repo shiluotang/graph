@@ -150,7 +150,8 @@ Rotating.prototype.doRun = function() {
 	var w = g.getWidth();
 	var h = g.getHeight();
 	var observer = new Observer();
-	observer.moveTo(new Vector3(200, 60, 200));
+	observer.moveTo(new Vector3(200, 200, 200));
+	observer.rotateX(-Math.PI / 4);
 	observer.rotateY(this.theta);
 	//observer.rotateZ(Math.PI / 7);
 	//observer.rotateX(Math.PI / 8);
@@ -159,14 +160,14 @@ Rotating.prototype.doRun = function() {
 	var yAxis = observer.get2DPosition(new Vector3(0, 100, 0));
 	var zAxis = observer.get2DPosition(new Vector3(0, 0, 100));
 
-	var p1 = observer.get2DPosition(new Vector3(0, 50, 50));
-	var p2 = observer.get2DPosition(new Vector3(50, 50, 50));
-	var p3 = observer.get2DPosition(new Vector3(50, 50, 0));
-	var p4 = observer.get2DPosition(new Vector3(0, 50, 0));
+	var p1 = observer.get2DPosition(new Vector3(0, 60, 50));
+	var p2 = observer.get2DPosition(new Vector3(70, 60, 50));
+	var p3 = observer.get2DPosition(new Vector3(70, 60, 0));
+	var p4 = observer.get2DPosition(new Vector3(0, 60, 0));
 
 	var p5 = observer.get2DPosition(new Vector3(0, 0, 50));
-	var p6 = observer.get2DPosition(new Vector3(50, 0, 50));
-	var p7 = observer.get2DPosition(new Vector3(50, 0, 0));
+	var p6 = observer.get2DPosition(new Vector3(70, 0, 50));
+	var p7 = observer.get2DPosition(new Vector3(70, 0, 0));
 	var p8 = observer.get2DPosition(new Vector3(0, 0, 0));
 
 	g.clear();
@@ -200,8 +201,9 @@ function test4() {
 	g.scale(1, -1);
 	g.translate(g.getWidth() / 2, g.getHeight() / 2);
 	var observer = new Observer();
-	observer.moveTo(new Vector3(100, 100, 100));
-	observer.rotateY(Math.PI * 2 / 100);
+	observer.moveTo(new Vector3(200, 200, 200));
+	observer.rotateX(-Math.PI / 4);
+	observer.rotateY(Math.PI / 4);
 	//observer.rotateZ(Math.PI / 7);
 	//observer.rotateX(Math.PI / 8);
 	var origin = observer.get2DPosition(new Vector3(0, 0, 0));
