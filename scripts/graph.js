@@ -168,7 +168,7 @@ TransformMatrix.prototype.rotate = function(radian) {
 	other.m00 = cosine; other.m01 = -sine;
 	other.m10 = sine; other.m11 = cosine;
 	var c = new TransformMatrix();
-	TransformMatrix.multiply(other, this, c);
+	TransformMatrix.multiply(this, other, c);
 	return c;
 }
 TransformMatrix.prototype.translate = function(dx, dy) {
@@ -176,7 +176,7 @@ TransformMatrix.prototype.translate = function(dx, dy) {
 	other.m02 = dx;
 	other.m12 = dy;
 	var c = new TransformMatrix();
-	TransformMatrix.multiply(other, this, c);
+	TransformMatrix.multiply(this, other, c);
 	return c;
 }
 TransformMatrix.prototype.scale = function(sx, sy) {
@@ -184,7 +184,7 @@ TransformMatrix.prototype.scale = function(sx, sy) {
 	other.m00 = sx || 1;
 	other.m11 = sy || 1;
 	var c = new TransformMatrix();
-	TransformMatrix.multiply(other, this, c);
+	TransformMatrix.multiply(this, other, c);
 	return c;
 }
 
