@@ -48,9 +48,9 @@ Rotating.prototype.doRun = function() {
 	g.drawLine(origin, xAxis);
 	g.drawLine(origin, yAxis);
 	g.drawLine(origin, zAxis);
-	g.drawText("X", xAxis);
-	g.drawText("Y", yAxis);
-	g.drawText("Z", zAxis);
+	g.drawUpText("X", xAxis);
+	g.drawUpText("Y", yAxis);
+	g.drawUpText("Z", zAxis);
 	g.setPen(new Pen(Color.BLACK));
 
 	g.drawLine(p1, p2);
