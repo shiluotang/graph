@@ -335,7 +335,15 @@ Graphics.prototype.drawPoint = function(p) {
 	this.ctx.fill();
 	this.ctx.closePath();
 }
-Graphics.prototype.drawText = function(literal, position) {
+Graphics.prototype.drawUpText = function(literal, position) {
+	position = position || Point2D.ORIGIN;
+	this.ctx.save();
+	this.ctx.translate(position.x, position.y);
+	this.ctx.scale(1, -1);
+	this.ctx.fillText(literal, 0, 0);
+	this.ctx.restore();
+}
+Graphics.prototype.drawViewUpText = function(literal, position) {
 	position = position || Point2D.ORIGIN;
 	var p = new Point2D();
 	var m = new TransformMatrix();
@@ -351,6 +359,12 @@ Graphics.prototype.drawText = function(literal, position) {
 	this.transformMatrix.assign(m);
 	this.setTransformFromMatrix();
 	m = null;
+}
+Graphics.prototype.drawText = function(literal, position) {
+	position = position || Point2D.ORIGIN;
+	this.ctx.beginPath();
+	this.ctx.fillText(literal, position.x, position.y);
+	this.ctx.closePath();
 }
 Graphics.prototype.fillPolygon = function(points, startIndex, endIndex) {
 	var len = points.length;
