@@ -5,7 +5,10 @@ function Color(red, green, blue, alpha) {
 	this.red = red || 0;
 	this.green = green || 0;
 	this.blue = blue || 0;
-	this.alpha = alpha || 1;
+	if(alpha === undefined || alpha === null)
+		this.alpha = 1;
+	else
+		this.alpha = alpha;
 	if(this.red < 1 && this.red > 0)
 		this.red = this.red * 255;
 	if(this.green < 1 && this.green > 0)
@@ -30,6 +33,7 @@ Color.prototype.toString = function() {
 		this.blue + "," +
 		this.alpha + ")";
 }
+Color.fromRGB = function(r, g, b) { return new Color(r, g, b); }
 Color.fromRGBA = function(r, g, b, a) { return new Color(r, g, b, a); }
 Color.BLACK = new Color();
 Color.WHITE = new Color(255, 255, 255);
@@ -200,6 +204,7 @@ function Graphics(ctx, pen, coordsys) {
 	this.setPen(pen);
 	this.setCoordSystem(coordsys);
 	this.transformMatrix = new TransformMatrix();
+	this.matrixStack = new Array(0);
 }
 Graphics.prototype = new RootObject();
 Graphics.CIRCLE_RADIAN = Math.PI * 2;
@@ -238,10 +243,17 @@ Graphics.prototype.setCoordSystem = function(coordsys) {
 	this.coordsys = coordsys;
 	return this;
 }
+Graphics.prototype.save = function() { this.matrixStack.push(this.transformMatrix); }
+Graphics.prototype.restore = function() {
+	var current = this.matrixStack.shift();
+	if(current != null)
+		this.transformMatrix = current;
+}
 Graphics.prototype.setTransform = function(m00, m01, m10, m11, dx, dy) {
 	this.ctx.setTransform(m00, m01, m10, m11, dx, dy);
 }
 Graphics.prototype.clearTransform = function() {
+	this.transformMatrix.setIdentity();
 	this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 Graphics.prototype.translate = function(dx, dy) {
@@ -289,9 +301,9 @@ Graphics.prototype.bezierCurveTo = function(startPoint,
 	this.ctx.moveTo(p.x, p.y);
 	var cp1 = new Point2D();
 	var cp2 = new Point2D();
-	this.tranform(controlPoint1, cp1);
-	this.tranform(controlPoint2, cp2);
-	this.tranform(endPoint, p);
+	this.transform(controlPoint1, cp1);
+	this.transform(controlPoint2, cp2);
+	this.transform(endPoint, p);
 	this.ctx.bezierCurveTo(cp1.x, cp1.y,
 			cp2.x, cp2.y,
 			p.x, p.y);
@@ -315,6 +327,25 @@ Graphics.prototype.drawLine = function(a, b) {
 	this.ctx.stroke();
 	this.ctx.closePath();
 }
+Graphics.prototype.fillPolygon = function(points, startIndex, endIndex) {
+	var len = points.length;
+	startIndex = startIndex || 0;
+	endIndex = endIndex || len - 1;
+	if(endIndex - startIndex < 2)
+		return;
+	console.log(points);
+	var p = new Point2D();
+	this.transform(points[startIndex], p);
+	this.ctx.moveTo(p.x, p.y);
+	for(var i = startIndex + 1; i <= endIndex; ++i) {
+		this.transform(points[i], p);
+		this.ctx.lineTo(p.x, p.y);
+	}
+	this.transform(points[startIndex], p);
+	this.ctx.lineTo(p.x, p.y);
+	this.ctx.fill();
+	this.ctx.closePath();
+}
 Graphics.prototype.drawPoint = function(p) {
 	var pp = new Point2D();
 	this.transform(p, pp);
@@ -331,9 +362,10 @@ Graphics.prototype.drawText = function(literal, position) {
 	var p = new Point2D();
 	this.transform(position, p);
 	this.ctx.beginPath();
-	this.ctx.moveTo(p.x, p.y);
-	if(!isNaN(p.x) && !isNaN(p.y))
+	if(!isNaN(p.x) && !isNaN(p.y)) {
+		this.ctx.moveTo(p.x, p.y);
 		this.ctx.fillText(literal, p.x, p.y);
+	}
 	this.ctx.closePath();
 }
 Graphics.prototype.drawCurve = function(points, startIndex, endIndex, t) {
@@ -394,20 +426,26 @@ Graphics.prototype.drawLines = function(points, startIndex, endIndex) {
 	endIndex = endIndex || len - 1;
 	if(endIndex - startIndex < 1)
 		return;
+	var p = new Point2D();
 	this.ctx.beginPath();
-	this.ctx.moveTo(points[startIndex].x, points[startIndex].y);
-	for(var i = startIndex + 1; i <= endIndex; ++i)
-		this.ctx.lineTo(points[i].x, points[i].y);
+	this.transform(points[startIndex], p);
+	this.ctx.moveTo(p.x, p.y);
+	for(var i = startIndex + 1; i <= endIndex; ++i) {
+		this.transform(points[i], p);
+		this.ctx.lineTo(p.x, p.y);
+	}
 	this.ctx.stroke();
 	this.ctx.closePath();
 }
 Graphics.prototype.drawPoints = function(points, startIndex, endIndex) {
+	var p = new Point2D();
 	startIndex = startIndex || 0;
 	endIndex = endIndex || points.length - 1;
 	this.ctx.beginPath();
 	for(var i = startIndex; i <= endIndex; ++i) {
-		this.ctx.moveTo(points[i].x, points[i].y);
-		this.ctx.arc(points[i].x, points[i].y, this.pen.size,
+		this.transform(points[i], p);
+		this.ctx.moveTo(p.x, p.y);
+		this.ctx.arc(p.x, p.y, this.pen.size,
 				0, Graphics.CIRCLE_RADIAN,
 				true);
 	}
