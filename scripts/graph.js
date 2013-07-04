@@ -271,12 +271,9 @@ Graphics.prototype.scale = function(sx, sy) {
 }
 
 Graphics.prototype.clear = function() {
-	var m = new TransformMatrix();
-	m.assign(this.transformMatrix);
-	this.clearTransform();
+	this.ctx.save();
 	this.ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
-	this.transformMatrix.assign(m);
-	this.setTransformFromMatrix();
+	this.ctx.restore();
 }
 Graphics.prototype.clearRect = function(rect) {
 	this.ctx.clearRect(rect.leftTop.x, rect.leftTop.y,
