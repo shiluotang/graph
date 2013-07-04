@@ -214,6 +214,7 @@ Graphics.prototype.ctx = undefined;
 Graphics.prototype.pen = undefined;
 Graphics.prototype.coordsys = undefined;
 Graphics.prototype.transformMatrix = undefined;
+Graphics.prototype.matrixStack = undefined;
 
 //methods
 Graphics.prototype.getWidth = function() { return this.ctx.canvas.width; }
@@ -228,7 +229,7 @@ Graphics.prototype.setPen = function(pen) {
 	this.ctx.strokeStyle = pen.color.toString();
 	this.ctx.lineWidth = pen.size;
 }
-Graphics.prototype.getCoordSystem = function() { 
+Graphics.prototype.getCoordSystem = function() {
 	return this.coordsys = (this.coordsys || new CoordSystem());
 }
 Graphics.prototype.setCoordSystem = function(coordsys) {
@@ -243,11 +244,13 @@ Graphics.prototype.setCoordSystem = function(coordsys) {
 	this.coordsys = coordsys;
 	return this;
 }
-Graphics.prototype.save = function() { this.matrixStack.push(this.transformMatrix); }
+Graphics.prototype.save = function() {
+	this.matrixStack.push(this.matrixStack);
+}
 Graphics.prototype.restore = function() {
-	var current = this.matrixStack.shift();
-	if(current != null)
-		this.transformMatrix = current;
+	var m = this.matrixStack.shift();
+	if(m !== undefined && m !== null)
+		this.transformMatrix = m;
 }
 Graphics.prototype.setTransform = function(m00, m01, m10, m11, dx, dy) {
 	this.ctx.setTransform(m00, m01, m10, m11, dx, dy);
@@ -368,6 +371,42 @@ Graphics.prototype.drawText = function(literal, position) {
 	}
 	this.ctx.closePath();
 }
+Graphics.prototype.fillPolygon = function(points, startIndex, endIndex) {
+	var p = new Point2D();
+	var len = points.length;
+	startIndex = startIndex || 0;
+	endIndex = endIndex || len - 1;
+	if(endIndex - startIndex < 2)
+		return;
+	this.transform(points[startIndex], p);
+	this.ctx.moveTo(p.x, p.y);
+	for(var i = startIndex + 1; i <= endIndex; ++i) {
+		this.transform(points[i], p);
+		this.ctx.lineTo(p.x, p.y);
+	}
+	this.transform(points[startIndex], p);
+	this.ctx.lineTo(p.x, p.y);
+	this.ctx.fill();
+	this.ctx.closePath();
+}
+Graphics.prototype.drawPolygon = function(points, startIndex, endIndex) {
+	var p = new Point2D();
+	var len = points.length;
+	startIndex = startIndex || 0;
+	endIndex = endIndex || len - 1;
+	if(endIndex - startIndex < 2)
+		return;
+	this.transform(points[startIndex], p);
+	this.ctx.moveTo(p.x, p.y);
+	for(var i = startIndex + 1; i <= endIndex; ++i) {
+		this.transform(points[i], p);
+		this.ctx.lineTo(p.x, p.y);
+	}
+	this.transform(points[startIndex], p);
+	this.ctx.lineTo(p.x, p.y);
+	this.ctx.stroke();
+	this.ctx.closePath();
+}
 Graphics.prototype.drawCurve = function(points, startIndex, endIndex, t) {
 	var len = points.length;
 	startIndex = startIndex || 0;
@@ -421,6 +460,7 @@ Graphics.prototype.drawCurve = function(points, startIndex, endIndex, t) {
 	controlPoints.length = 0;
 }
 Graphics.prototype.drawLines = function(points, startIndex, endIndex) {
+	var p = new Point2D();
 	var len = points.length;
 	startIndex = startIndex || 0;
 	endIndex = endIndex || len - 1;
@@ -453,7 +493,7 @@ Graphics.prototype.drawPoints = function(points, startIndex, endIndex) {
 	this.ctx.closePath();
 }
 Graphics.prototype.drawImage = function(img, position) {
-   	this.ctx.drawImage(img, position.x, position.y); 
+   	this.ctx.drawImage(img, position.x, position.y);
 }
 Graphics.prototype.drawSlicedImage = function(img, sourceRect, destRect) {
 	this.ctx.drawImage(img,
