@@ -67,6 +67,8 @@ Point2D.prototype.assign = function(other) {
 }
 Point2D.prototype.getX = function() { return this.x; }
 Point2D.prototype.getY = function() { return this.y; }
+Point2D.prototype.setX = function(x) { this.x = x; return this; }
+Point2D.prototype.setY = function(y) { this.y = y; return this; }
 Point2D.prototype.distanceSquare = function(other) {
 	var dx = other.x - this.x;
 	var dy = other.y - this.y;
