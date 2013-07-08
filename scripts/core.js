@@ -21,7 +21,7 @@ var Type = Type || {
 	toString : function(o, type) {
 		type = type || Object;
 		if(o.toString)
-			return o.toString;
+			return o.toString();
 		return type.prototype.toString.call(o);
 	}
 };
