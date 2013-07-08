@@ -243,6 +243,9 @@ Graphics.prototype.restore = function() {
 		this.transformMatrix = m;
 	this.ctx.restore();
 }
+Graphics.prototype.getCurrentTransformMatrix = function() {
+	return this.transformMatrix;
+}
 /**
  * m11	m12	dx
  * m21	m22 dy
