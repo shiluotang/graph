@@ -13,7 +13,7 @@ function get2DContext(nodeOrId) {
 function Rotating(graphics) {
 	this.graphics = graphics;
 	this.theta = 0;
-	this.delta = Math.PI / 2 / 300;
+	this.delta = Math.PI / 2 / 600;
 }
 Rotating.prototype = new Runnable();
 Rotating.prototype.isFinished = function() { return this.theta >= Math.PI / 2; }
@@ -70,12 +70,113 @@ Rotating.prototype.doRun = function() {
 }
 
 function test1() {
-	var g = new Graphics(get2DContext("canvas_node"));
-	g.translate(g.getWidth() / 2, g.getHeight() / 2);
-	g.scale(1, -1);
-	var rotating = new Rotating(g);
-	var timer = new Timer(rotating, 1000 / 24);
+	var graphics;
+	var isDragging = false;
+	function mouseMoveListener(e) {
+		if(isDragging) {
+			var deltaX = e.mozMovementX;
+			var deltaY = e.mozMovementY;
+			var destVector = new Point2D();
+			var m = graphics.transformMatrix;
+			destVector.setX(m.m00 * deltaX + m.m01 * deltaY);
+			destVector.setY(m.m10 * deltaX + m.m11 * deltaY);
+			console.log(destVector);
+			graphics.translate(destVector.getX(), destVector.getY());
+			graphics.clear();
+		}
+	}
+	function mouseDownListener(e) { isDragging = true; }
+	function mouseUpListener(e) { isDragging = false; }
+	graphics = new Graphics(get2DContext("canvas_node"));
+	
+	graphics.translate(graphics.getWidth() / 2, graphics.getHeight() / 2);
+	graphics.scale(1, -1);
+	var rotating = new Rotating(graphics);
+	var timer = new AnimationTimer(rotating);
 	timer.start();
+	var canvasDomNode = document.getElementById("canvas_node");
+	canvasDomNode.addEventListener("mousemove", mouseMoveListener, false);
+	canvasDomNode.addEventListener("mousedown", mouseDownListener, false);
+	canvasDomNode.addEventListener("mouseup", mouseUpListener, false);
 }
 
-HtmlDom.addEventListener(window, "onload", test1);
+function test2() {
+	var graphics;
+	var isDragging = false;
+	function mouseWheelListener(e) {
+		var eventTarget = e.target || e.srcElement;
+		var rect = eventTarget.getBoundingClientRect();
+		var src = new Point2D();
+		src.x = e.clientX - rect.left;
+		src.y = e.clientY - rect.top;
+		if(e.detail === 0)
+			return;
+		var scaling = e.detail < 0 ? 1.2 : 0.8;
+		var dest = new Point2D();
+		graphics.transformMatrix.transform(src, dest);
+		console.log(src);
+		console.log(dest);
+		graphics.translate(dest.x, dest.y);
+		graphics.scale(scaling, scaling);
+		graphics.translate(-dest.x, -dest.y);
+		console.log(scaling);
+		graphics.clear();
+		drawAxes();
+	}
+	function mouseMoveListener(e) {
+		if(isDragging) {
+			var deltaX = e.mozMovementX;
+			var deltaY = e.mozMovementY;
+			var destVector = new Point2D();
+			var m = graphics.transformMatrix;
+			destVector.setX(m.m00 * deltaX + m.m01 * deltaY);
+			destVector.setY(m.m10 * deltaX + m.m11 * deltaY);
+			graphics.translate(destVector.getX(), destVector.getY());
+			graphics.clear();
+			drawAxes();
+		}
+	}
+	/**
+	 * 1. pageX, pageY
+	 * 2. screenX, screenY
+	 * 3. mozMovementX mozMovementY
+	 * 4. clientX, clientY
+	 * 5. layerX, layerY
+	 * 1 == 4 == 5
+	 * if there're scollings then
+	 * 1 == 5 == 4 + scollings (scollTop or scrollLeft)
+	 */
+	function mouseDownListener(e) {
+		var eventTarget = e.target || e.srcElement;
+		var rect = eventTarget.getBoundingClientRect();
+		var x = e.clientX - rect.left;
+		var y = e.clientY - rect.top;
+		isDragging = true;
+	}
+	function mouseUpListener(e) {
+		var eventTarget = e.target || e.srcElement;
+		var rect = eventTarget.getBoundingClientRect();
+		var x = e.clientX - rect.left;
+		var y = e.clientY - rect.top;
+		isDragging = false;
+	}
+	function drawAxes() {
+		graphics.drawPoint(new Point2D(300, 300));
+		graphics.drawLine(new Point2D(-graphics.getWidth() / 2, 0), new Point2D(graphics.getWidth() / 2, 0));
+		graphics.drawLine(new Point2D(0, -graphics.getHeight() / 2), new Point2D(0, graphics.getHeight() / 2));
+		graphics.drawUpText("X - Axis", new Point2D(graphics.getWidth() / 2, 0));
+		graphics.drawUpText("Y - Axis", new Point2D(0, graphics.getHeight() / 2));
+	}
+	var canvasDomNode = document.getElementById("canvas_node");
+	graphics = new Graphics(get2DContext("canvas_node"));
+	graphics.translate(graphics.getWidth() / 2, graphics.getHeight() / 2);
+	graphics.scale(1, -1);
+	graphics.drawLine(new Point2D(-graphics.getWidth() / 2, 0), new Point2D(graphics.getWidth() / 2, 0));
+	graphics.drawLine(new Point2D(0, -graphics.getHeight() / 2), new Point2D(0, graphics.getHeight() / 2));
+	canvasDomNode.addEventListener("mousemove", mouseMoveListener, false);
+	canvasDomNode.addEventListener("mousedown", mouseDownListener, false);
+	canvasDomNode.addEventListener("mouseup", mouseUpListener, false);
+	canvasDomNode.addEventListener("DOMMouseScroll", mouseWheelListener, false);
+}
+
+HtmlDom.addEventListener(window, "onload", test2);
