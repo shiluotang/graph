@@ -101,6 +101,11 @@ function test1() {
 }
 
 function test2() {
+    function test_matrix() {
+        var matrix = new Matrix3(1, 0, 320, 0, -1, 160, 0, 0, 1);
+        console.log(matrix.inverse());
+    }
+    test_matrix();
 	var graphics;
 	var isDragging = false;
 	function mouseWheelListener(e) {
@@ -112,7 +117,7 @@ function test2() {
 		console.log(src);
 		if(e.detail === 0)
 			return;
-		var scaling = e.detail < 0 ? 1.09 : 0.81;
+		var scaling = e.detail < 0 ? 1.09 : 1.0 / 1.09;
 		var dest = new Point2D();
 		graphics.getCurrentTransformMatrix().inverse().transform(src, dest);
 		console.log(dest);

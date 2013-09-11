@@ -159,9 +159,7 @@ TransformMatrix.inverse = function(a, c) {
 	c.m02 = a.m01 * a.m12 - a.m02 * a.m11;
 	c.m12 = a.m02 * a.m10 - a.m00 * a.m12;
 	c.m22 = a.m00 * a.m11 - a.m01 * a.m10;
-	var detA = a.m00 * c.m00 + a.m01 * c.m10 + a.m02 * c.m20 +
-		a.m10 * c.m01 + a.m11 * c.m11 + a.m12 * c.m21 +
-		a.m20 * c.m02 + a.m21 * c.m12 + a.m22 * c.m22;
+	var detA = a.m00 * c.m00 + a.m01 * c.m10 + a.m02 * c.m20;
 	if(detA === 0)
 		throw new Error("can't get inverse");
 	var coeff = 1.0 / detA;

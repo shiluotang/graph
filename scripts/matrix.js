@@ -123,10 +123,10 @@ Matrix.prototype.toString = function() {
 	return vectors.join('\n');
 }
 
-function Matrix3() {
-	this.m00 = 0; this.m01 = 0; this.m02 = 0;
-	this.m10 = 0; this.m11 = 0; this.m12 = 0;
-	this.m20 = 0; this.m21 = 0; this.m22 = 0;
+function Matrix3(m00, m01, m02, m10, m11, m12, m20, m21, m22) {
+	this.m00 = m00 || 0; this.m01 = m01 || 0; this.m02 = m02 || 0;
+	this.m10 = m10 || 0; this.m11 = m11 || 0; this.m12 = m12 || 0;
+	this.m20 = m20 || 0; this.m21 = m21 || 0; this.m22 = m22 || 0;
 }
 Matrix3.prototype = new RootObject();
 Matrix3.prototype.m00 = undefined;
@@ -186,6 +186,38 @@ Matrix3.multiply = function(a, b, c) {
 	c.m21 = a.m20 * b.m01 + a.m21 * b.m11 + a.m22 * b.m21;
 	c.m22 = a.m20 * b.m02 + a.m21 * b.m12 + a.m22 * b.m22;
 }
+Matrix3.inverse = function(a, c) {
+	c.m00 = a.m11 * a.m22 - a.m12 * a.m21;
+	c.m10 = a.m12 * a.m20 - a.m10 * a.m22;
+	c.m20 = a.m10 * a.m21 - a.m11 * a.m20;
+
+	c.m01 = a.m02 * a.m21 - a.m01 * a.m22;
+	c.m11 = a.m00 * a.m22 - a.m02 * a.m20;
+	c.m21 = a.m01 * a.m20 - a.m00 * a.m21;
+
+	c.m02 = a.m01 * a.m12 - a.m02 * a.m11;
+	c.m12 = a.m02 * a.m10 - a.m00 * a.m12;
+	c.m22 = a.m00 * a.m11 - a.m01 * a.m10;
+	var detA = a.m00 * c.m00 + a.m01 * c.m10 + a.m02 * c.m20;
+	if(detA === 0)
+		throw new Error("can't get inverse");
+    console.log("[Matrix3::inverse] a = " + a);
+    console.log("[Matrix3::inverse] transpose(c) = " + c);
+    console.log("[Matrix3::inverse] detA = " + detA);
+	var coeff = 1.0 / detA;
+	c.m00 *= coeff;
+	c.m01 *= coeff;
+	c.m02 *= coeff;
+
+	c.m10 *= coeff;
+	c.m11 *= coeff;
+	c.m12 *= coeff;
+
+	c.m20 *= coeff;
+	c.m21 *= coeff;
+	c.m22 *= coeff;
+    console.log(a.multiply(c));
+}
 
 Matrix3.prototype.assign = function(other) {
 	Matrix3.assign(other, this);
@@ -216,6 +248,11 @@ Matrix3.prototype.multiply = function(other) {
 	Matrix3.multiply(this, other, c);
 	return c;
 }
+Matrix3.prototype.inverse = function() {
+    var c = new Matrix3();
+    Matrix3.inverse(this, c);
+    return c;
+}
 Matrix3.prototype.addSelf = function(other) {
 	Matrix3.add(this, other, this);
 	return this;
@@ -235,7 +272,6 @@ Matrix3.prototype.transposeSelf = function() {
 Matrix3.prototype.setIdentity = function() {
 	Matrix3.setIdentity(this);
 }
-
 Matrix3.prototype.toString = function() {
 	var row0 = [this.m00, this.m01, this.m02].join(',');
 	var row1 = [this.m10, this.m11, this.m12].join(',');
