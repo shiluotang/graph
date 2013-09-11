@@ -109,17 +109,16 @@ function test2() {
 		var src = new Point2D();
 		src.x = e.clientX - rect.left;
 		src.y = e.clientY - rect.top;
+		console.log(src);
 		if(e.detail === 0)
 			return;
-		var scaling = e.detail < 0 ? 1.2 : 0.8;
+		var scaling = e.detail < 0 ? 1.09 : 0.81;
 		var dest = new Point2D();
-		graphics.transformMatrix.transform(src, dest);
-		console.log(src);
+		graphics.getCurrentTransformMatrix().inverse().transform(src, dest);
 		console.log(dest);
 		graphics.translate(dest.x, dest.y);
 		graphics.scale(scaling, scaling);
 		graphics.translate(-dest.x, -dest.y);
-		console.log(scaling);
 		graphics.clear();
 		drawAxes();
 	}
@@ -129,8 +128,15 @@ function test2() {
 			var deltaY = e.mozMovementY;
 			var destVector = new Point2D();
 			var m = graphics.transformMatrix;
-			destVector.setX(m.m00 * deltaX + m.m01 * deltaY);
-			destVector.setY(m.m10 * deltaX + m.m11 * deltaY);
+			console.log("deltaX: " + deltaX + ", deltaY: " + deltaY);
+			var abs_cosine = Math.sqrt(Math.abs(m.m00 * m.m11 / (m.m00 * m.m11 - m.m01 * m.m10)));
+			var abs_scaleX = Math.abs(m.m00 / abs_cosine);
+			var abs_scaleY = Math.abs(m.m11 / abs_cosine);
+			console.log("scaleX: " + abs_scaleX + ", scaleY: " + abs_scaleY);
+			destVector.setX((m.m00 * deltaX + m.m01 * deltaY) / abs_scaleX / abs_scaleX);
+			destVector.setY((m.m10 * deltaX + m.m11 * deltaY) / abs_scaleY / abs_scaleY);
+			console.log(destVector);
+			console.log(m);
 			graphics.translate(destVector.getX(), destVector.getY());
 			graphics.clear();
 			drawAxes();
