@@ -147,6 +147,37 @@ TransformMatrix.multiply = function(a, b, c) {
 	c.m21 = a.m20 * b.m01 + a.m21 * b.m11 + a.m22 * b.m21;
 	c.m22 = a.m20 * b.m02 + a.m21 * b.m12 + a.m22 * b.m22;
 }
+TransformMatrix.inverse = function(a, c) {
+	c.m00 = a.m11 * a.m22 - a.m12 * a.m21;
+	c.m10 = a.m12 * a.m20 - a.m10 * a.m22;
+	c.m20 = a.m10 * a.m21 - a.m11 * a.m20;
+
+	c.m01 = a.m02 * a.m21 - a.m01 * a.m22;
+	c.m11 = a.m00 * a.m22 - a.m02 * a.m20;
+	c.m21 = a.m01 * a.m20 - a.m00 * a.m21;
+
+	c.m02 = a.m01 * a.m12 - a.m02 * a.m11;
+	c.m12 = a.m02 * a.m10 - a.m00 * a.m12;
+	c.m22 = a.m00 * a.m11 - a.m01 * a.m10;
+	var detA = a.m00 * c.m00 + a.m01 * c.m10 + a.m02 * c.m20 +
+		a.m10 * c.m01 + a.m11 * c.m11 + a.m12 * c.m21 +
+		a.m20 * c.m02 + a.m21 * c.m12 + a.m22 * c.m22;
+	if(detA === 0)
+		throw new Error("can't get inverse");
+	var coeff = 1.0 / detA;
+	c.m00 *= coeff;
+	c.m01 *= coeff;
+	c.m02 *= coeff;
+
+	c.m10 *= coeff;
+	c.m11 *= coeff;
+	c.m12 *= coeff;
+
+	c.m20 *= coeff;
+	c.m21 *= coeff;
+	c.m22 *= coeff;
+}
+
 TransformMatrix.prototype = new RootObject();
 TransformMatrix.prototype.m00 = undefined;
 TransformMatrix.prototype.m01 = undefined;
@@ -202,6 +233,11 @@ TransformMatrix.prototype.transform = function(src, dest) {
 	dest.x = this.m00 * src.x + this.m01 * src.y + this.m02;
 	dest.y = this.m10 * src.x + this.m11 * src.y + this.m12;
 	return dest;
+}
+TransformMatrix.prototype.inverse = function() {
+	var c = new TransformMatrix();
+	TransformMatrix.inverse(this, c);
+	return c;
 }
 
 function Graphics(ctx, pen) {
