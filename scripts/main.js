@@ -72,21 +72,65 @@ Rotating.prototype.doRun = function() {
 function test1() {
 	var graphics;
 	var isDragging = false;
+	//function mouseMoveListener(e) {
+	//	if(isDragging) {
+	//		var deltaX = e.mozMovementX;
+	//		var deltaY = e.mozMovementY;
+	//		var destVector = new Point2D();
+	//		var m = graphics.transformMatrix;
+	//		destVector.setX(m.m00 * deltaX + m.m01 * deltaY);
+	//		destVector.setY(m.m10 * deltaX + m.m11 * deltaY);
+	//		graphics.translate(destVector.getX(), destVector.getY());
+	//		graphics.clear();
+	//	}
+	//}
+	//function mouseDownListener(e) { isDragging = true; }
+	//function mouseUpListener(e) { isDragging = false; }
+	function mouseWheelListener(e) {
+		var eventTarget = e.target || e.srcElement;
+		var rect = eventTarget.getBoundingClientRect();
+		var src = new Point2D();
+		src.x = e.clientX - rect.left;
+		src.y = e.clientY - rect.top;
+		if(e.detail === 0)
+			return;
+		var scaling = e.detail < 0 ? 1.09 : 1.0 / 1.09;
+		var dest = new Point2D();
+		graphics.getCurrentTransformMatrix().inverse().transform(src, dest);
+		graphics.translate(dest.x, dest.y);
+		graphics.scale(scaling, scaling);
+		graphics.translate(-dest.x, -dest.y);
+		graphics.clear();
+	}
 	function mouseMoveListener(e) {
 		if(isDragging) {
 			var deltaX = e.mozMovementX;
 			var deltaY = e.mozMovementY;
 			var destVector = new Point2D();
 			var m = graphics.transformMatrix;
-			destVector.setX(m.m00 * deltaX + m.m01 * deltaY);
-			destVector.setY(m.m10 * deltaX + m.m11 * deltaY);
-			console.log(destVector);
+			var abs_cosine = Math.sqrt(Math.abs(m.m00 * m.m11 / (m.m00 * m.m11 - m.m01 * m.m10)));
+			var abs_scaleX = Math.abs(m.m00 / abs_cosine);
+			var abs_scaleY = Math.abs(m.m11 / abs_cosine);
+			destVector.setX((m.m00 * deltaX + m.m01 * deltaY) / abs_scaleX / abs_scaleX);
+			destVector.setY((m.m10 * deltaX + m.m11 * deltaY) / abs_scaleY / abs_scaleY);
 			graphics.translate(destVector.getX(), destVector.getY());
 			graphics.clear();
 		}
 	}
-	function mouseDownListener(e) { isDragging = true; }
-	function mouseUpListener(e) { isDragging = false; }
+	function mouseDownListener(e) {
+		var eventTarget = e.target || e.srcElement;
+		var rect = eventTarget.getBoundingClientRect();
+		var x = e.clientX - rect.left;
+		var y = e.clientY - rect.top;
+		isDragging = true;
+	}
+	function mouseUpListener(e) {
+		var eventTarget = e.target || e.srcElement;
+		var rect = eventTarget.getBoundingClientRect();
+		var x = e.clientX - rect.left;
+		var y = e.clientY - rect.top;
+		isDragging = false;
+	}
 	graphics = new Graphics(get2DContext("canvas_node"));
 	
 	graphics.translate(graphics.getWidth() / 2, graphics.getHeight() / 2);
@@ -98,14 +142,10 @@ function test1() {
 	canvasDomNode.addEventListener("mousemove", mouseMoveListener, false);
 	canvasDomNode.addEventListener("mousedown", mouseDownListener, false);
 	canvasDomNode.addEventListener("mouseup", mouseUpListener, false);
+	canvasDomNode.addEventListener("DOMMouseScroll", mouseWheelListener, false);
 }
 
 function test2() {
-    function test_matrix() {
-        var matrix = new Matrix3(1, 0, 320, 0, -1, 160, 0, 0, 1);
-        console.log(matrix.inverse());
-    }
-    test_matrix();
 	var graphics;
 	var isDragging = false;
 	function mouseWheelListener(e) {
@@ -114,13 +154,11 @@ function test2() {
 		var src = new Point2D();
 		src.x = e.clientX - rect.left;
 		src.y = e.clientY - rect.top;
-		console.log(src);
 		if(e.detail === 0)
 			return;
 		var scaling = e.detail < 0 ? 1.09 : 1.0 / 1.09;
 		var dest = new Point2D();
 		graphics.getCurrentTransformMatrix().inverse().transform(src, dest);
-		console.log(dest);
 		graphics.translate(dest.x, dest.y);
 		graphics.scale(scaling, scaling);
 		graphics.translate(-dest.x, -dest.y);
@@ -133,15 +171,11 @@ function test2() {
 			var deltaY = e.mozMovementY;
 			var destVector = new Point2D();
 			var m = graphics.transformMatrix;
-			console.log("deltaX: " + deltaX + ", deltaY: " + deltaY);
 			var abs_cosine = Math.sqrt(Math.abs(m.m00 * m.m11 / (m.m00 * m.m11 - m.m01 * m.m10)));
 			var abs_scaleX = Math.abs(m.m00 / abs_cosine);
 			var abs_scaleY = Math.abs(m.m11 / abs_cosine);
-			console.log("scaleX: " + abs_scaleX + ", scaleY: " + abs_scaleY);
 			destVector.setX((m.m00 * deltaX + m.m01 * deltaY) / abs_scaleX / abs_scaleX);
 			destVector.setY((m.m10 * deltaX + m.m11 * deltaY) / abs_scaleY / abs_scaleY);
-			console.log(destVector);
-			console.log(m);
 			graphics.translate(destVector.getX(), destVector.getY());
 			graphics.clear();
 			drawAxes();
@@ -190,4 +224,4 @@ function test2() {
 	canvasDomNode.addEventListener("DOMMouseScroll", mouseWheelListener, false);
 }
 
-HtmlDom.addEventListener(window, "onload", test2);
+HtmlDom.addEventListener(window, "onload", test1);

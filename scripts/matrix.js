@@ -201,9 +201,6 @@ Matrix3.inverse = function(a, c) {
 	var detA = a.m00 * c.m00 + a.m01 * c.m10 + a.m02 * c.m20;
 	if(detA === 0)
 		throw new Error("can't get inverse");
-    console.log("[Matrix3::inverse] a = " + a);
-    console.log("[Matrix3::inverse] transpose(c) = " + c);
-    console.log("[Matrix3::inverse] detA = " + detA);
 	var coeff = 1.0 / detA;
 	c.m00 *= coeff;
 	c.m01 *= coeff;
@@ -216,7 +213,10 @@ Matrix3.inverse = function(a, c) {
 	c.m20 *= coeff;
 	c.m21 *= coeff;
 	c.m22 *= coeff;
-    console.log(a.multiply(c));
+}
+Matrix3.transform = function(m, src, dest) {
+    dest.x = m.m00 * src.x + m.m01 * src.y + m.m02;
+    dest.y = m.m10 * src.x + m.m11 * src.y + m.m12;
 }
 
 Matrix3.prototype.assign = function(other) {
@@ -253,6 +253,10 @@ Matrix3.prototype.inverse = function() {
     Matrix3.inverse(this, c);
     return c;
 }
+Matrix3.prototype.transform = function(src, dest) {
+    Matrix3.transform(this, src, dest);
+    return dest;
+}
 Matrix3.prototype.addSelf = function(other) {
 	Matrix3.add(this, other, this);
 	return this;
@@ -271,6 +275,7 @@ Matrix3.prototype.transposeSelf = function() {
 }
 Matrix3.prototype.setIdentity = function() {
 	Matrix3.setIdentity(this);
+    return this;
 }
 Matrix3.prototype.toString = function() {
 	var row0 = [this.m00, this.m01, this.m02].join(',');
@@ -367,6 +372,14 @@ Matrix4.multiply = function(a, b, c) {
 	c.m31 = a.m30 * b.m01 + a.m31 * b.m11 + a.m32 * b.m21 + a.m33 * b.m31;
 	c.m32 = a.m30 * b.m02 + a.m31 * b.m12 + a.m32 * b.m22 + a.m33 * b.m32;
 	c.m33 = a.m30 * b.m03 + a.m31 * b.m13 + a.m32 * b.m23 + a.m33 * b.m33;
+}
+Matrix4.inverse = function() {
+    //TODO: not implemented
+}
+Matrix4.transform = function(m, src, dest) {
+    dest.x = m.m00 * src.x + m.m01 * src.y + m.m02 * src.z + m.m03;
+    dest.y = m.m10 * src.x + m.m11 * src.y + m.m12 * src.z + m.m13;
+    dest.z = m.m20 * src.x + m.m21 * src.y + m.m22 * src.z + m.m23;
 }
 
 Matrix4.prototype.assign = function(other) {
