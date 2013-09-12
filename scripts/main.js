@@ -13,21 +13,21 @@ function get2DContext(nodeOrId) {
 function Rotating(graphics) {
 	this.graphics = graphics;
 	this.theta = 0;
-	this.delta = Math.PI / 2 / 600;
+	this.delta = Math.PI / 600;
+    this.observerPos = new Vector3(0, 0, 200);
 }
 Rotating.prototype = new Runnable();
-Rotating.prototype.isFinished = function() { return this.theta >= Math.PI / 2; }
+Rotating.prototype.isFinished = function() { return this.theta >= Math.PI * 8; }
 Rotating.prototype.doRun = function() {
 	this.theta += this.delta;
 	var g = this.graphics;
 	var w = g.getWidth();
 	var h = g.getHeight();
+    this.observerPos.x = 200 * Math.sin(this.theta);
+    this.observerPos.z = 200 * Math.cos(this.theta);
 	var observer = new Observer();
-	observer.moveTo(new Vector3(200, 200, 200));
-	observer.rotateX(-Math.PI / 4);
-	observer.rotateY(this.theta);
-	//observer.rotateZ(Math.PI / 7);
-	//observer.rotateX(Math.PI / 8);
+	observer.moveTo(this.observerPos);
+    observer.rotateY(this.theta);
 	var origin = observer.get2DPosition(new Vector3(0, 0, 0));
 	var xAxis = observer.get2DPosition(new Vector3(100, 0, 0));
 	var yAxis = observer.get2DPosition(new Vector3(0, 100, 0));
@@ -59,13 +59,13 @@ Rotating.prototype.doRun = function() {
 	g.drawLine(p4, p1);
 	g.drawLine(p5, p6);
 	g.drawLine(p6, p7);
-	//g.drawLine(p7, p8);
-	//g.drawLine(p8, p5);
+	g.drawLine(p7, p8);
+	g.drawLine(p8, p5);
 
 	g.drawLine(p1, p5);
 	g.drawLine(p2, p6);
 	g.drawLine(p3, p7);
-	//g.drawLine(p4, p8);
+	g.drawLine(p4, p8);
 
 }
 
@@ -123,6 +123,7 @@ function test1() {
 		var x = e.clientX - rect.left;
 		var y = e.clientY - rect.top;
 		isDragging = true;
+        eventTarget.style["cursor"] = "move";
 	}
 	function mouseUpListener(e) {
 		var eventTarget = e.target || e.srcElement;
@@ -130,6 +131,7 @@ function test1() {
 		var x = e.clientX - rect.left;
 		var y = e.clientY - rect.top;
 		isDragging = false;
+        eventTarget.style["cursor"] = "default";
 	}
 	graphics = new Graphics(get2DContext("canvas_node"));
 	
