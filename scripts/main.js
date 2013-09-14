@@ -17,7 +17,7 @@ function Rotating(graphics) {
     this.observerPos = new Vector3(0, 0, 200);
 }
 Rotating.prototype = new Runnable();
-Rotating.prototype.isFinished = function() { return this.theta >= Math.PI * 8; }
+Rotating.prototype.isFinished = function() { return false; }
 Rotating.prototype.doRun = function() {
 	this.theta += this.delta;
 	var g = this.graphics;
