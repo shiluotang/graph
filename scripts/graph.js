@@ -269,7 +269,7 @@ Graphics.prototype.fillPolygon = function(points, startIndex, endIndex) {
 		p = points[i];
 		this.ctx.lineTo(p.x, p.y);
 	}
-	this.transform(points[startIndex], p);
+    p = points[startIndex];
 	this.ctx.lineTo(p.x, p.y);
 	this.ctx.fill();
 	this.ctx.closePath();
