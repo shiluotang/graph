@@ -46,13 +46,14 @@ var Ajax = Ajax || {
 			var val = request.data[propName];
 			if(Type.isFunction(val))
 				continue;
-			properties.push(propName + "=" + encodeURI(val));
+            //ATTENTION: encodeURI is not working!!! encodeURI("http://yahoo.com") === "http://yahoo.com"
+			properties.push(propName + "=" + encodeURIComponent(val));
 		}
 		request.data = properties.join("&");
 		properties.length = 0;
 
 		if(request.method === "POST") {
-			request.headers.push("Content-Type", "x/www-form-urlencoded");
+			request.headers.push("Content-Type", "application/x-www-form-urlencoded");
 		} else if (request.method === "GET") {
 			var pos = request.url.indexOf('?');
 			if(pos === -1) {
