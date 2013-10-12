@@ -99,8 +99,13 @@ var JSONEnhancement = {
 		return dump(value);
 	}
 };
+var StringEnhancement = {
+    startsWith : function(prefix) { return this.indexOf(prefix) === 0; },
+    endsWith : function(suffix) { return this.indexOf(suffix) + suffix.length === this.length; }
+}
 enhance(Object.prototype, ObjectEnhancement, false);
 enhance(Array.prototype, ArrayEnhancement, false);
+enhance(String.prototype, StringEnhancement, false);
 enhance(JSON || new Object(), JSONEnhancement, false);
 
 function RootObject() { }

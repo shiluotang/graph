@@ -149,21 +149,206 @@ TransformMatrix.prototype.scale = function(sx, sy) {
     return this.multiply(b);
 }
 
-function Graphics(ctx, pen) {
-	this.ctx = ctx;
+function Graphics(domNode, pen) {
+    if(domNode === undefined || domNode === null)
+        throw new Error("no DOM node specified.");
+    if(domNode.getContext) {
+        try {
+            this.ctx = domNode.getContext("2d");
+        } catch(e) {
+        }
+    }
+    if(this.ctx === undefined || this.ctx === null)
+        throw new Error("HTML5 canvas api not supported!");
+    this.domNode = domNode;
 	pen = pen || new Pen();
 	this.setPen(pen);
 	this.transformMatrix = new TransformMatrix();
 	this.matrixStack = new Array(0);
+
+    var eventTableMaxIndex = -1;
+    for(var propName in Graphics) {
+        if(propName === undefined || propName === null)
+            return;
+        if(propName.startsWith("MOUSE_") && propName.endsWith("_EVENT"))
+            if(eventTableMaxIndex < Graphics[propName])
+                eventTableMaxIndex = Graphics[propName];
+    }
+    this.eventTable = new Array(eventTableMaxIndex === -1 ? 0 : eventTableMaxIndex + 1);
+    for(var i = 0; i < this.eventTable.length; ++i)
+        this.eventTable[i] = new Array(0);
+    this.addEventListener(Graphics.MOUSE_WHEEL_EVENT, Graphics.mouseWheelHandler);
+    this.addEventListener(Graphics.MOUSE_DRAG_END_EVENT, Graphics.mouseDragEndHandler);
+    this.enableMouseControl();
 }
 Graphics.prototype = new RootObject();
 Graphics.CIRCLE_RADIAN = Math.PI * 2;
+
+//event table indexes. make sure constants 
+//start with "MOUSE_" prefix and end with 
+//"_EVENT" suffix
+Graphics.MOUSE_WHEEL_EVENT = 0;
+Graphics.MOUSE_DRAG_EVENT = 1;
+Graphics.MOUSE_DRAG_START_EVENT = 2;
+Graphics.MOUSE_DRAG_END_EVENT = 3;
+Graphics.MOUSE_UP_EVENT = 4;
+Graphics.MOUSE_DOWN_EVENT = 5;
+Graphics.MOUSE_CLICK_EVENT = 6;
 
 //fields
 Graphics.prototype.ctx = undefined;
 Graphics.prototype.pen = undefined;
 Graphics.prototype.transformMatrix = undefined;
 Graphics.prototype.matrixStack = undefined;
+Graphics.prototype.dragData = {
+    isDragging : false,
+    startClientX : 0, startClientY : 0,
+    currentClientX : 0, currentClientY : 0,
+    movementX : 0, movementY : 0,
+    lastClientX: 0, lastClientY: 0,
+    totalMovementX : 0, totalMovementY : 0
+};
+
+//listeners
+Graphics.prototype.addEventListener = function(eventType, callback) {
+    var oldCallbacks = this.eventTable[eventType];
+    var newCallbacks = new Array(oldCallbacks.length);
+    for(var i = 0; i < oldCallbacks.length; ++i)
+        newCallbacks[i] = oldCallbacks[i];
+    newCallbacks.push(callback);
+    this.eventTable[eventType] = newCallbacks;
+}
+Graphics.prototype.removeEventListener = function(eventType, callback) {
+    var oldCallbacks = this.eventTable[eventType];
+    var newCallbacks = new Array(oldCallbacks.length);
+    var removeIndex = -1;
+    for(var i = 0; i < oldCallbacks.length; ++i) {
+        if(newCallbacks[i] === callback) {
+            removeIndex = i;
+            break;
+        }
+    }
+    if(removeIndex !== -1)
+        newCallbacks.splice(removeIndex, 1);
+    this.eventTable[eventType] = newCallbacks;
+}
+Graphics.prototype.triggerEvent = function(eventType) {
+    var callbacks = this.eventTable[eventType];
+    var args = Array.prototype.slice.call(arguments, 1);
+    for(var i = 0; i < callbacks.length; ++i)
+        callbacks[i].apply(null, args);
+}
+Graphics.prototype.enableMouseControl = function() {
+    var me = this;
+    if(this.domNode !== undefined && this.domNode !== null) {
+        HtmlDom.addEventListener(this.domNode, "mousemove", function(e) { me.mouseMoveHandler(e) });
+        HtmlDom.addEventListener(this.domNode, "mousedown", function(e) { me.mouseDownHandler(e) });
+        HtmlDom.addEventListener(this.domNode, "mouseup", function(e) { me.mouseUpHandler(e) });
+        HtmlDom.addEventListener(this.domNode, "click", function(e) { me.mouseClickHandler(e) });
+        HtmlDom.addEventListener(this.domNode, "mousewheel", function(e) { me.mouseWheelHandler(e) });
+    }
+}
+Graphics.prototype.mouseWheelHandler = function(e) {
+    e = e || window.event;
+    var delta = 0;
+    if(e.wheelDelta !== undefined && e.wheelDelta !== null)
+        delta = e.wheelDelta / 120;
+    else if(e.detail !== undefined && e.detail !== null)
+        delta = -e.detail / 3;
+    else 
+        return true;
+    console.log("mouse wheel event: delta = " + delta);
+    if(delta === 0)
+        return true;
+    this.triggerEvent(Graphics.MOUSE_WHEEL_EVENT, this, e, delta);
+    if(e.preventDefault)
+        e.preventDefault();
+    else
+        return false;
+}
+Graphics.prototype.mouseUpHandler = function(e) {
+    if(!this.dragData.isDragging)
+        return;
+    e = e || window.event;
+    this.dragData.isDragging = false;
+    this.domNode.style["cursor"] = "default";
+    console.log("mouse drag-end event");
+    this.triggerEvent(Graphics.MOUSE_DRAG_END_EVENT, this, e);
+}
+Graphics.prototype.mouseDownHandler = function(e) {
+    e = e || window.event;
+
+    this.dragData.startClientX = e.clientX;
+    this.dragData.startClientY = e.clientY;
+
+    this.dragData.currentClientX = this.dragData.startClientX;
+    this.dragData.currentClientY = this.dragData.startClientY;
+
+    this.dragData.lastClientX = this.dragData.startClientX;
+    this.dragData.lastClientY = this.dragData.startClientY;
+
+    this.dragData.movementX = 0;
+    this.dragData.movementY = 0;
+
+    this.dragData.totalMovementX = 0;
+    this.dragData.totalMovementY = 0;
+
+    this.dragData.isDragging = true;
+    this.domNode.style["cursor"] = "move";
+    this.triggerEvent(Graphics.MOUSE_DOWN_EVENT, this, e);
+}
+Graphics.prototype.mouseClickHandler = function(e) {
+    e = e || window.event;
+    console.log("mouse click event");
+    this.triggerEvent(Graphics.MOUSE_CLICK_EVENT, this, e);
+}
+Graphics.prototype.mouseMoveHandler = function(e) {
+    if(!this.dragData.isDragging)
+        return;
+    e = e || window.event;
+    this.dragData.currentClientX = e.clientX;
+    this.dragData.currentClientY = e.clientY;
+    this.dragData.movementX = this.dragData.currentClientX - this.dragData.lastClientX;
+    this.dragData.movementY = this.dragData.currentClientY - this.dragData.lastClientY;
+    this.dragData.totalMovementX = this.dragData.currentClientX - this.dragData.startClientX;
+    this.dragData.totalMovementY = this.dragData.currentClientY - this.dragData.startClientY;
+
+    console.log("movementX = " + this.dragData.movementX);
+    console.log("movementY = " + this.dragData.movementY);
+    console.log("totalMovementX = " + this.dragData.totalMovementX);
+    console.log("totalMovementY = " + this.dragData.totalMovementY);
+    console.log("mouse drag event");
+    this.triggerEvent(Graphics.MOUSE_DRAG_EVENT, this, e);
+    this.dragData.lastClientX = this.dragData.currentClientX;
+    this.dragData.lastClientX = this.dragData.currentClientY;
+}
+Graphics.mouseWheelHandler = function(graphics, e, delta) {
+    var rect = graphics.domNode.getBoundingClientRect();
+    var src = new Point2D();
+    src.x = e.clientX - rect.left;
+    src.y = e.clientY - rect.top;
+    if(delta === 0)
+        return;
+    var scaling = delta < 0 ? 1.09 : 1.0 / 1.09;
+    var dest = new Point2D();
+    graphics.getCurrentTransformMatrix().inverse().transform(src, dest);
+    graphics.translate(dest.x, dest.y);
+    graphics.scale(scaling, scaling);
+    graphics.scale(scaling, scaling);
+    graphics.translate(-dest.x, -dest.y);
+}
+Graphics.mouseDragEndHandler = function(graphics, e) {
+    var deltaX = graphics.dragData.totalMovementX;
+    var deltaY = graphics.dragData.totalMovementY;
+    var destVector = new Point2D();
+    var m = graphics.transformMatrix;
+    var abs_cosine = Math.sqrt(Math.abs(m.m00 * m.m11 / (m.m00 * m.m11 - m.m01 * m.m10)));
+    var abs_scaleX = Math.abs(m.m00 / abs_cosine);
+    var abs_scaleY = Math.abs(m.m11 / abs_cosine);
+    destVector.setX((m.m00 * deltaX + m.m01 * deltaY) / abs_scaleX / abs_scaleX);
+    destVector.setY((m.m10 * deltaX + m.m11 * deltaY) / abs_scaleY / abs_scaleY);
+    graphics.translate(destVector.getX(), destVector.getY());
+}
 
 //methods
 Graphics.prototype.getWidth = function() { return this.ctx.canvas.width; }
