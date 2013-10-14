@@ -54,9 +54,12 @@ function AnimationTimer(runnable) {
 		|| window.mozRequestAnimationFrame
 		|| window.webkitRequestAnimationFrame
 		|| window.msRequestAnimationFrame;
-	var cancelAnimationFrameImpl = window.cancelAnimationFrame;
-	if(!requestAnimationFrameImpl)
-		throw new Error("requestAnimationFrame is not supported");
+	var cancelAnimationFrameImpl = window.cancelAnimationFrame
+		|| window.mozCancelAnimationFrame
+		|| window.webkitCancelAnimationFrame
+		|| window.msCancelAnimationFrame;
+	if(!requestAnimationFrameImpl || !cancelAnimationFrameImpl)
+		throw new Error("animation frame api is not supported!");
 	if(!(this.runnable = Runnable.wrap(runnable)))
 		throw new Error("can't make a runnable object from " + runnable);
 	RootObject.call(this);
