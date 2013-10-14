@@ -39,6 +39,9 @@ function Canvas(graphics) {
 		throw new Error("argument exception \"graphics\"");
 	this.graphics = graphics;
 	this.shapes = new Array();
+    var me = this;
+    this.graphics.addEventListener(Graphics.MOUSE_DRAG_END_EVENT, function() { me.render(); });
+    this.graphics.addEventListener(Graphics.MOUSE_WHEEL_EVENT, function() { me.render(); });
 }
 
 Canvas.prototype = new RootObject();
