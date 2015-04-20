@@ -178,7 +178,7 @@ function Graphics(domNode, pen) {
     for(var i = 0; i < this.eventTable.length; ++i)
         this.eventTable[i] = new Array(0);
     this.addEventListener(Graphics.MOUSE_WHEEL_EVENT, Graphics.mouseWheelHandler);
-    this.addEventListener(Graphics.MOUSE_DRAG_END_EVENT, Graphics.mouseDragEndHandler);
+    this.addEventListener(Graphics.MOUSE_DRAG_EVENT, Graphics.mouseDraggingHandler);
     this.enableMouseControl();
 }
 Graphics.prototype = new RootObject();
@@ -308,10 +308,18 @@ Graphics.prototype.mouseMoveHandler = function(e) {
     e = e || window.event;
     this.dragData.currentClientX = e.clientX;
     this.dragData.currentClientY = e.clientY;
+    console.log("lastClientX = " + this.dragData.lastClientX);
+    console.log("lastClientY = " + this.dragData.lastClientY);
+    console.log("currentClientX = " + this.dragData.currentClientX);
+    console.log("currentClientY = " + this.dragData.currentClientY);
     this.dragData.movementX = this.dragData.currentClientX - this.dragData.lastClientX;
     this.dragData.movementY = this.dragData.currentClientY - this.dragData.lastClientY;
     this.dragData.totalMovementX = this.dragData.currentClientX - this.dragData.startClientX;
     this.dragData.totalMovementY = this.dragData.currentClientY - this.dragData.startClientY;
+
+    // update before translate.
+    this.dragData.lastClientX = this.dragData.currentClientX;
+    this.dragData.lastClientY = this.dragData.currentClientY;
 
     console.log("movementX = " + this.dragData.movementX);
     console.log("movementY = " + this.dragData.movementY);
@@ -319,8 +327,6 @@ Graphics.prototype.mouseMoveHandler = function(e) {
     console.log("totalMovementY = " + this.dragData.totalMovementY);
     console.log("mouse drag event");
     this.triggerEvent(Graphics.MOUSE_DRAG_EVENT, this, e);
-    this.dragData.lastClientX = this.dragData.currentClientX;
-    this.dragData.lastClientX = this.dragData.currentClientY;
 }
 Graphics.mouseWheelHandler = function(graphics, e, delta) {
     var rect = graphics.domNode.getBoundingClientRect();
@@ -340,6 +346,18 @@ Graphics.mouseWheelHandler = function(graphics, e, delta) {
 Graphics.mouseDragEndHandler = function(graphics, e) {
     var deltaX = graphics.dragData.totalMovementX;
     var deltaY = graphics.dragData.totalMovementY;
+    var destVector = new Point2D();
+    var m = graphics.transformMatrix;
+    var abs_cosine = Math.sqrt(Math.abs(m.m00 * m.m11 / (m.m00 * m.m11 - m.m01 * m.m10)));
+    var abs_scaleX = Math.abs(m.m00 / abs_cosine);
+    var abs_scaleY = Math.abs(m.m11 / abs_cosine);
+    destVector.setX((m.m00 * deltaX + m.m01 * deltaY) / abs_scaleX / abs_scaleX);
+    destVector.setY((m.m10 * deltaX + m.m11 * deltaY) / abs_scaleY / abs_scaleY);
+    graphics.translate(destVector.getX(), destVector.getY());
+}
+Graphics.mouseDraggingHandler  = function(graphics, e) {
+    var deltaX = graphics.dragData.movementX;
+    var deltaY = graphics.dragData.movementY;
     var destVector = new Point2D();
     var m = graphics.transformMatrix;
     var abs_cosine = Math.sqrt(Math.abs(m.m00 * m.m11 / (m.m00 * m.m11 - m.m01 * m.m10)));
