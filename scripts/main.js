@@ -1,88 +1,88 @@
 function Rotating(graphics) {
-	this.graphics = graphics;
-	this.theta = 0;
-	this.delta = Math.PI / 600;
+    this.graphics = graphics;
+    this.theta = 0;
+    this.delta = Math.PI / 600;
     this.observerPos = new Vector3(0, 0, 200);
 }
 Rotating.prototype = new Runnable();
 Rotating.prototype.isFinished = function() { return false; }
 Rotating.prototype.doRun = function() {
-	this.theta += this.delta;
-	var g = this.graphics;
-	var w = g.getWidth();
-	var h = g.getHeight();
+    this.theta += this.delta;
+    var g = this.graphics;
+    var w = g.getWidth();
+    var h = g.getHeight();
     this.observerPos.x = 200 * Math.sin(this.theta);
     this.observerPos.z = 200 * Math.cos(this.theta);
-	var observer = new Observer();
-	observer.moveTo(this.observerPos);
+    var observer = new Observer();
+    observer.moveTo(this.observerPos);
     observer.rotateY(this.theta);
-	var origin = observer.get2DPosition(new Vector3(0, 0, 0));
-	var xAxis = observer.get2DPosition(new Vector3(100, 0, 0));
-	var yAxis = observer.get2DPosition(new Vector3(0, 100, 0));
-	var zAxis = observer.get2DPosition(new Vector3(0, 0, 100));
+    var origin = observer.get2DPosition(new Vector3(0, 0, 0));
+    var xAxis = observer.get2DPosition(new Vector3(100, 0, 0));
+    var yAxis = observer.get2DPosition(new Vector3(0, 100, 0));
+    var zAxis = observer.get2DPosition(new Vector3(0, 0, 100));
 
-	var p1 = observer.get2DPosition(new Vector3(0, 60, 50));
-	var p2 = observer.get2DPosition(new Vector3(70, 60, 50));
-	var p3 = observer.get2DPosition(new Vector3(70, 60, 0));
-	var p4 = observer.get2DPosition(new Vector3(0, 60, 0));
+    var p1 = observer.get2DPosition(new Vector3(0, 60, 50));
+    var p2 = observer.get2DPosition(new Vector3(70, 60, 50));
+    var p3 = observer.get2DPosition(new Vector3(70, 60, 0));
+    var p4 = observer.get2DPosition(new Vector3(0, 60, 0));
 
-	var p5 = observer.get2DPosition(new Vector3(0, 0, 50));
-	var p6 = observer.get2DPosition(new Vector3(70, 0, 50));
-	var p7 = observer.get2DPosition(new Vector3(70, 0, 0));
-	var p8 = observer.get2DPosition(new Vector3(0, 0, 0));
+    var p5 = observer.get2DPosition(new Vector3(0, 0, 50));
+    var p6 = observer.get2DPosition(new Vector3(70, 0, 50));
+    var p7 = observer.get2DPosition(new Vector3(70, 0, 0));
+    var p8 = observer.get2DPosition(new Vector3(0, 0, 0));
 
-	g.clear();
-	g.setPen(new Pen(Color.RED));
-	g.drawLine(origin, xAxis);
-	g.drawLine(origin, yAxis);
-	g.drawLine(origin, zAxis);
-	g.drawUpText("X", xAxis);
-	g.drawUpText("Y", yAxis);
-	g.drawUpText("Z", zAxis);
-	g.setPen(new Pen(Color.BLACK));
+    g.clear();
+    g.setPen(new Pen(Color.RED));
+    g.drawLine(origin, xAxis);
+    g.drawLine(origin, yAxis);
+    g.drawLine(origin, zAxis);
+    g.drawUpText("X", xAxis);
+    g.drawUpText("Y", yAxis);
+    g.drawUpText("Z", zAxis);
+    g.setPen(new Pen(Color.BLACK));
 
-	g.drawLine(p1, p2);
-	g.drawLine(p2, p3);
-	g.drawLine(p3, p4);
-	g.drawLine(p4, p1);
-	g.drawLine(p5, p6);
-	g.drawLine(p6, p7);
-	g.drawLine(p7, p8);
-	g.drawLine(p8, p5);
+    g.drawLine(p1, p2);
+    g.drawLine(p2, p3);
+    g.drawLine(p3, p4);
+    g.drawLine(p4, p1);
+    g.drawLine(p5, p6);
+    g.drawLine(p6, p7);
+    g.drawLine(p7, p8);
+    g.drawLine(p8, p5);
 
-	g.drawLine(p1, p5);
-	g.drawLine(p2, p6);
-	g.drawLine(p3, p7);
-	g.drawLine(p4, p8);
+    g.drawLine(p1, p5);
+    g.drawLine(p2, p6);
+    g.drawLine(p3, p7);
+    g.drawLine(p4, p8);
 
 }
 
 function test1() {
-	var graphics;
-	graphics = new Graphics(HtmlDom.$("canvas_node"));
-	graphics.translate(graphics.getWidth() / 2, graphics.getHeight() / 2);
-	graphics.scale(1, -1);
-	var rotating = new Rotating(graphics);
-	var timer = new AnimationTimer(rotating);
-	timer.start();
+    var graphics;
+    graphics = new Graphics(HtmlDom.$("canvas_node"));
+    graphics.translate(graphics.getWidth() / 2, graphics.getHeight() / 2);
+    graphics.scale(1, -1);
+    var rotating = new Rotating(graphics);
+    var timer = new AnimationTimer(rotating);
+    timer.start();
 }
 
 function test2() {
-	var graphics;
-	var isDragging = false;
-	function drawAxes() {
-		graphics.drawPoint(new Point2D(300, 300));
-		graphics.drawLine(new Point2D(-graphics.getWidth() / 2, 0), new Point2D(graphics.getWidth() / 2, 0));
-		graphics.drawLine(new Point2D(0, -graphics.getHeight() / 2), new Point2D(0, graphics.getHeight() / 2));
-		graphics.drawUpText("X - Axis", new Point2D(graphics.getWidth() / 2, 0));
-		graphics.drawUpText("Y - Axis", new Point2D(0, graphics.getHeight() / 2));
-	}
-	var canvasDomNode = document.getElementById("canvas_node");
-	graphics = new Graphics(HtmlDom.$("canvas_node"));
-	graphics.translate(graphics.getWidth() / 2, graphics.getHeight() / 2);
-	graphics.scale(1, -1);
-	graphics.drawLine(new Point2D(-graphics.getWidth() / 2, 0), new Point2D(graphics.getWidth() / 2, 0));
-	graphics.drawLine(new Point2D(0, -graphics.getHeight() / 2), new Point2D(0, graphics.getHeight() / 2));
+    var graphics;
+    var isDragging = false;
+    function drawAxes() {
+        graphics.drawPoint(new Point2D(300, 300));
+        graphics.drawLine(new Point2D(-graphics.getWidth() / 2, 0), new Point2D(graphics.getWidth() / 2, 0));
+        graphics.drawLine(new Point2D(0, -graphics.getHeight() / 2), new Point2D(0, graphics.getHeight() / 2));
+        graphics.drawUpText("X - Axis", new Point2D(graphics.getWidth() / 2, 0));
+        graphics.drawUpText("Y - Axis", new Point2D(0, graphics.getHeight() / 2));
+    }
+    var canvasDomNode = document.getElementById("canvas_node");
+    graphics = new Graphics(HtmlDom.$("canvas_node"));
+    graphics.translate(graphics.getWidth() / 2, graphics.getHeight() / 2);
+    graphics.scale(1, -1);
+    graphics.drawLine(new Point2D(-graphics.getWidth() / 2, 0), new Point2D(graphics.getWidth() / 2, 0));
+    graphics.drawLine(new Point2D(0, -graphics.getHeight() / 2), new Point2D(0, graphics.getHeight() / 2));
 }
 
 HtmlDom.addEventListener(window, "onload", test1);
